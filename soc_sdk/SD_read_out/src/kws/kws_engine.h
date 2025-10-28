@@ -13,6 +13,8 @@ extern "C" {
 #define KWS_SD_MOUNT_POINT      "0:/"
 #define KWS_DEFAULT_WEIGHT_PATH "0:/kws/kws_weights.bin"
 
+#define KWS_SOURCE_SAMPLE_RATE   16000U
+#define KWS_SOURCE_CHANNELS      1U
 #define KWS_TARGET_SAMPLE_RATE   16000U
 #define KWS_INPUT_ROWS           40U
 #define KWS_INPUT_COLS           98U
@@ -25,7 +27,7 @@ extern "C" {
 XStatus KwsEngine_Initialize(const char *weight_file_path);
 void    KwsEngine_Shutdown(void);
 int     KwsEngine_IsReady(void);
-XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
+XStatus KwsEngine_ProcessRecording(const int32_t *source_buffer,
                                    size_t frames_per_channel,
                                    u32 *out_class_index,
                                    float *out_confidence);
