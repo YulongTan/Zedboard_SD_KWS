@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert WAV files to little-endian 32-bit stereo PCM binaries for Zynq KWS."""
+"""Convert WAV files to little-endian 32-bit PCM binaries for the Zynq KWS demo."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import sys
 import wave
 from pathlib import Path
 
-DEFAULT_TARGET_RATE = 96000
-DEFAULT_CHANNELS = 2
+DEFAULT_TARGET_RATE = 16000
+DEFAULT_CHANNELS = 1
 DEFAULT_DURATION = 1.0
 
 
@@ -44,8 +44,8 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=DEFAULT_CHANNELS,
         help=(
-            "Expected number of audio channels. The KWS firmware consumes stereo "
-            "samples (left/right)."
+            "Expected number of audio channels. The default matches the mono "
+            "1-second clips consumed by the KWS firmware."
         ),
     )
     parser.add_argument(
@@ -143,6 +143,31 @@ def _resample_if_needed(
     return resampled
 
 
+def _convert_channels(samples: list[int], channels: int, target_channels: int) -> list[int]:
+    if channels == target_channels:
+        return samples
+
+    if channels == 1 and target_channels == 2:
+        stereo: list[int] = []
+        for sample in samples:
+            stereo.extend((sample, sample))
+        return stereo
+
+    if channels == 2 and target_channels == 1:
+        if len(samples) % 2 != 0:
+            raise SystemExit("Stereo to mono conversion requires an even sample count")
+        mono: list[int] = []
+        for i in range(0, len(samples), 2):
+            left = samples[i]
+            right = samples[i + 1]
+            mono.append(int((left + right) / 2))
+        return mono
+
+    raise SystemExit(
+        f"Unsupported channel conversion: {channels} -> {target_channels}"
+    )
+
+
 def _prepare_samples(
     samples: list[int],
     channels: int,
@@ -151,15 +176,16 @@ def _prepare_samples(
     target_rate: int,
     duration: float,
 ) -> list[int]:
-    if channels != target_channels:
-        raise SystemExit(
-            f"Expected {target_channels} channels, but WAV contains {channels}"
-        )
 
     if len(samples) % channels != 0:
         raise SystemExit("WAV data is not aligned to the declared channel count")
 
     samples = _resample_if_needed(samples, channels, sample_rate, target_rate)
+    samples = _convert_channels(samples, channels, target_channels)
+    channels = target_channels
+
+    if len(samples) % channels != 0:
+        raise SystemExit("Channel conversion produced misaligned sample data")
 
     required_frames = int(round(duration * target_rate))
     if required_frames <= 0:
@@ -187,6 +213,7 @@ def main() -> int:
 
     channels, sample_width, sample_rate, raw = _load_wav(args.input_wav)
     samples = _decode_samples(raw, sample_width)
+    input_channels = channels
     resampled = sample_rate != args.target_rate
     samples = _prepare_samples(
         samples,
@@ -199,12 +226,15 @@ def main() -> int:
     _write_bin(args.output_bin, samples)
 
     frames_written = len(samples) // args.channels
+    channel_converted = input_channels != args.channels
     print(
         "Conversion complete:\n"
         f"  Input : {args.input_wav}\n"
         f"  Output: {args.output_bin}\n"
         f"  Rate  : {sample_rate} Hz -> {args.target_rate} Hz"
         f"{' (resampled)' if resampled else ''}\n"
+        f"  Chans : {input_channels} -> {args.channels}"
+        f"{' (converted)' if channel_converted else ''}\n"
         f"  Frames: {frames_written} per channel\n"
         f"  Bytes : {len(samples) * 4}"
     )
