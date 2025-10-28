@@ -23,11 +23,8 @@
 /************************** Function Prototypes ******************************/
 
 /************************** Variable Definitions *****************************/
-#define AUDIO_SAMPLING_RATE	  96000
 
-// Number of samples to record/playback
-#define NR_AUDIO_SAMPLES		(NR_SEC_TO_REC_PLAY*AUDIO_SAMPLING_RATE)
-#define KWS_DMA_TRANSFER_BYTES		(1U * NR_AUDIO_SAMPLES)
+
 /************************** Buffer Setting *****************************/
 
 int main(void)
@@ -44,12 +41,10 @@ int main(void)
 		xil_printf("\r\nKWS engine initialization failed; inference disabled\r\n");
 	}
 	// read input from SD
-	// the data address in DDR is MEM_BASE_ADDR
 
 	// start inference
     u32 classIndex = 0U;
     float confidence = 0.0f;
-    //
     Status = KwsEngine_ProcessRecording((const int32_t *)MEM_BASE_ADDR,
                                         NR_AUDIO_SAMPLES,
                                         &classIndex,
@@ -57,6 +52,9 @@ int main(void)
     if (Status == XST_SUCCESS)
     {
 		int scaled = (int)(confidence * 10000.0f + 0.5f);
+		Demo.u32KwsClass = classIndex;
+		Demo.fKwsConfidence = confidence;
+		Demo.fKwsResultValid = 1;
 		xil_printf("\r\nKWS inference: class %lu (confidence %d.%02d%%)",
 				(unsigned long)classIndex,
 				scaled / 100,
@@ -66,8 +64,6 @@ int main(void)
     {
 		xil_printf("\r\nKWS inference failed");
     }
-
 	return 0;
-
 }
 

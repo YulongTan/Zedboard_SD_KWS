@@ -1,0 +1,35 @@
+/******************************************************************************
+* Copyright (c) 2013 - 2020 Xilinx, Inc.  All rights reserved.
+* SPDX-License-Identifier: MIT
+******************************************************************************/
+
+/***************************** Include Files *********************************/
+#include <stdio.h>
+#include "sleep.h"
+#include "xparameters.h"	/* SDK generated parameters */
+#include "xplatform_info.h"
+#include "xil_printf.h"
+#include "xil_cache.h"
+#include "xsdps.h"			/* SD device driver */
+#include "ff.h"
+//kws network
+#include "./kws/kws_engine.h"
+/************************** Constant Definitions *****************************/
+
+/**************************** Type Definitions *******************************/
+
+/***************** Macros (Inline Functions) Definitions *********************/
+
+/************************** Function Prototypes ******************************/
+
+/************************** Variable Definitions *****************************/
+
+
+/************************** Buffer Setting *****************************/
+
+int main(void)
+{
+
+	return 0;
+}
+

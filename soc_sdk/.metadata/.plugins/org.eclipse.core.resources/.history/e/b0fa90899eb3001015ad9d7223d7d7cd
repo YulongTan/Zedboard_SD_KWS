@@ -66,7 +66,6 @@ int main(void)
     {
 		xil_printf("\r\nKWS inference failed");
     }
-
 	return 0;
 
 }

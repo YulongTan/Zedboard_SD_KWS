@@ -26,3 +26,6 @@ bsp write
 bsp reload
 catch {bsp regenerate}
 platform generate
+platform active {SD_read}
+bsp reload
+bsp reload
