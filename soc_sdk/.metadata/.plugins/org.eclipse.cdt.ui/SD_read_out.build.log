@@ -1,25 +1,10 @@
-16:20:38 **** Incremental Build of configuration Debug for project SD_read_out ****
+16:32:07 **** Incremental Build of configuration Debug for project SD_read_out ****
 make all 
 D:/Vitis/Vitis/2022.1/gnuwin/bin/make --no-print-directory pre-build
 a9-linaro-pre-build-step
 ' '
 D:/Vitis/Vitis/2022.1/gnuwin/bin/make --no-print-directory main-build
-'Building file: ../src/helloworld.c'
-'Invoking: ARM v7 gcc compiler'
-arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/helloworld.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/bspinclude/include -MMD -MP -MF"src/helloworld.d" -MT"src/helloworld.o" -o "src/helloworld.o" "../src/helloworld.c"
-'Finished building: ../src/helloworld.c'
-' '
-'Building target: SD_read_out.elf'
-'Invoking: ARM v7 gcc linker'
-arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=none -specs=Xilinx.spec -Wl,-T -Wl,../src/lscript.ld -LD:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/bsplib/lib -o "SD_read_out.elf"  ./src/kws/kws_engine.o  ./src/helloworld.o ./src/platform.o   -lm -Wl,--start-group,-lxil,-lgcc,-lc,--end-group -Wl,--start-group,-lxilffs,-lxil,-lgcc,-lc,--end-group
-'Finished building target: SD_read_out.elf'
-' '
-'Invoking: ARM v7 Print Size'
-arm-none-eabi-size SD_read_out.elf  |tee "SD_read_out.elf.size"
-   text	   data	    bss	    dec	    hex	filename
- 139612	   2228	17472256	17614096	10cc510	SD_read_out.elf
-'Finished building: SD_read_out.elf.size'
-' '
+make[1]: Nothing to be done for 'main-build'.
 
-16:20:39 Build Finished (took 1s.265ms)
+16:32:08 Build Finished (took 521ms)
 

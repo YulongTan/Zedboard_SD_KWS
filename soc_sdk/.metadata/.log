@@ -24683,3 +24683,314 @@ Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.]. Thread: Worker-4: Launch
 
 !ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:22:04.902
 !MESSAGE XSCT command with result: [con], Result: [null, ]. Thread: Worker-4: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:07.587
+!MESSAGE XSCT Command: [ ::hsi::utils::set_current_hw_sw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss ], Thread: Worker-0: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:07.642
+!MESSAGE XSCT command with result: [ ::hsi::utils::set_current_hw_sw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss ], Result: [null, ]. Thread: Worker-0: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:07.643
+!MESSAGE XSCT Command: [::hsi::utils::get_hw_sw_details -json D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Thread: Worker-0: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:07.655
+!MESSAGE XSCT command with result: [::hsi::utils::get_hw_sw_details -json D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Result: [null, {"procname": "ps7_cortexa9_0",
+"osname": "standalone",
+"osver": "7.7",
+}]. Thread: Worker-0: Build Project
+
+!ENTRY com.xilinx.sdk.utils 1 0 2025-10-30 16:32:07.657
+!MESSAGE Generating MD5 hash for file: D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read\export\SD_read\sw\SD_read\standalone_domain\system.mss ...
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:07.659
+!MESSAGE XSCT Command: [::hsi::utils::closesw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Thread: Worker-0: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:07.663
+!MESSAGE XSCT command with result: [::hsi::utils::closesw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Result: [null, ]. Thread: Worker-0: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:53.574
+!MESSAGE XSCT Command: [disconnect tcfchan#6], Thread: Thread-292
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:32:53.582
+!MESSAGE XSCT command with result: [disconnect tcfchan#6], Result: [null, ]. Thread: Thread-292
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:54.084
+!MESSAGE XSCT Command: [connect -url tcp:127.0.0.1:3121], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY org.eclipse.tcf 4 0 2025-10-30 16:33:56.244
+!MESSAGE Invalid peerAdded event
+!STACK 0
+java.lang.Error
+	at org.eclipse.tcf.internal.services.remote.LocatorProxy$1.event(LocatorProxy.java:64)
+	at org.eclipse.tcf.core.AbstractChannel.handleInput(AbstractChannel.java:1191)
+	at org.eclipse.tcf.core.AbstractChannel$1$1.run(AbstractChannel.java:371)
+	at org.eclipse.tcf.EventQueue.run(EventQueue.java:98)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+!ENTRY org.eclipse.tcf 4 0 2025-10-30 16:33:56.244
+!MESSAGE Invalid peerAdded event
+!STACK 0
+java.lang.Error
+	at org.eclipse.tcf.internal.services.remote.LocatorProxy$1.event(LocatorProxy.java:64)
+	at org.eclipse.tcf.core.AbstractChannel.handleInput(AbstractChannel.java:1191)
+	at org.eclipse.tcf.core.AbstractChannel$1$1.run(AbstractChannel.java:371)
+	at org.eclipse.tcf.EventQueue.run(EventQueue.java:98)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+!ENTRY org.eclipse.tcf 4 0 2025-10-30 16:33:56.248
+!MESSAGE Invalid peerAdded event
+!STACK 0
+java.lang.Error
+	at org.eclipse.tcf.internal.services.remote.LocatorProxy$1.event(LocatorProxy.java:64)
+	at org.eclipse.tcf.core.AbstractChannel.handleInput(AbstractChannel.java:1191)
+	at org.eclipse.tcf.core.AbstractChannel$1$1.run(AbstractChannel.java:371)
+	at org.eclipse.tcf.EventQueue.run(EventQueue.java:98)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+!ENTRY org.eclipse.tcf 4 0 2025-10-30 16:33:56.248
+!MESSAGE Invalid peerAdded event
+!STACK 0
+java.lang.Error
+	at org.eclipse.tcf.internal.services.remote.LocatorProxy$1.event(LocatorProxy.java:64)
+	at org.eclipse.tcf.core.AbstractChannel.handleInput(AbstractChannel.java:1191)
+	at org.eclipse.tcf.core.AbstractChannel$1$1.run(AbstractChannel.java:371)
+	at org.eclipse.tcf.EventQueue.run(EventQueue.java:98)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+!ENTRY org.eclipse.tcf 4 0 2025-10-30 16:33:56.248
+!MESSAGE Invalid peerAdded event
+!STACK 0
+java.lang.Error
+	at org.eclipse.tcf.internal.services.remote.LocatorProxy$1.event(LocatorProxy.java:64)
+	at org.eclipse.tcf.core.AbstractChannel.handleInput(AbstractChannel.java:1191)
+	at org.eclipse.tcf.core.AbstractChannel$1$1.run(AbstractChannel.java:371)
+	at org.eclipse.tcf.EventQueue.run(EventQueue.java:98)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.290
+!MESSAGE XSCT command with result: [connect -url tcp:127.0.0.1:3121], Result: [null, tcfchan#8]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.290
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.489
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.489
+!MESSAGE XSCT Command: [version -server], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.493
+!MESSAGE XSCT command with result: [version -server], Result: [null, 2022.1]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.493
+!MESSAGE XSCT Command: [version], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.493
+!MESSAGE XSCT command with result: [version], Result: [null, xsct 2022.1.0
+SW Build 303 on 2022-04-13-17:42:48
+Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.493
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.501
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.501
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.518
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.518
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.522
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.522
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.539
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.539
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.543
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.547
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.560
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.560
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.569
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.569
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.581
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.585
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.589
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.589
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.604
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.606
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.610
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.610
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.622
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.622
+!MESSAGE XSCT Command: [jtag targets -set -filter {name =~ "Digilent Zed 210248B77C6C" && level == 0}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.639
+!MESSAGE XSCT command with result: [jtag targets -set -filter {name =~ "Digilent Zed 210248B77C6C" && level == 0}], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.639
+!MESSAGE XSCT Command: [jtag frequency], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.639
+!MESSAGE XSCT command with result: [jtag frequency], Result: [null, 15000000]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.639
+!MESSAGE XSCT Command: [targets -set -nocase -filter {name =~"APU*"}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.648
+!MESSAGE XSCT command with result: [targets -set -nocase -filter {name =~"APU*"}], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.648
+!MESSAGE XSCT Command: [rst -system], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.711
+!MESSAGE XSCT command with result: [rst -system], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:56.711
+!MESSAGE XSCT Command: [after 3000], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.722
+!MESSAGE XSCT command with result: [after 3000], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.748
+!MESSAGE XSCT Command: [jtag targets -filter {level == 0}], Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.760
+!MESSAGE XSCT command with result: [jtag targets -filter {level == 0}], Result: [null,   1* Digilent Zed 210248B77C6C]. Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.760
+!MESSAGE XSCT Command: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.774
+!MESSAGE XSCT command with result: [jtag targets -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==1}], Result: [null,      2  arm_dap (idcode 4ba00477 irlen 4)
+     3  xc7z020 (idcode 23727093 irlen 6 fpga)]. Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.774
+!MESSAGE XSCT Command: [targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}], Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.807
+!MESSAGE XSCT command with result: [targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}], Result: [null, ]. Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:33:59.807
+!MESSAGE XSCT Command: [fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit], Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.147
+!MESSAGE XSCT command with result: [fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit], Result: [null, ]. Thread: ModalContext
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.178
+!MESSAGE XSCT Command: [targets -set -nocase -filter {name =~"APU*"}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.188
+!MESSAGE XSCT command with result: [targets -set -nocase -filter {name =~"APU*"}], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.189
+!MESSAGE XSCT Command: [loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.224
+!MESSAGE XSCT command with result: [loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs], Result: [null, design_1_wrapper_0]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.225
+!MESSAGE XSCT Command: [configparams force-mem-access 1], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.226
+!MESSAGE XSCT command with result: [configparams force-mem-access 1], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.227
+!MESSAGE XSCT Command: [targets -set -nocase -filter {name =~"APU*"}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.235
+!MESSAGE XSCT command with result: [targets -set -nocase -filter {name =~"APU*"}], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.236
+!MESSAGE XSCT Command: [source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.241
+!MESSAGE XSCT command with result: [source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.242
+!MESSAGE XSCT Command: [ps7_init], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.492
+!MESSAGE XSCT command with result: [ps7_init], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.492
+!MESSAGE XSCT Command: [ps7_post_config], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.500
+!MESSAGE XSCT command with result: [ps7_post_config], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.500
+!MESSAGE XSCT Command: [targets -set -nocase -filter {name =~ "*A9*#0"}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.512
+!MESSAGE XSCT command with result: [targets -set -nocase -filter {name =~ "*A9*#0"}], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.512
+!MESSAGE XSCT Command: [dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.863
+!MESSAGE XSCT command with result: [dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.865
+!MESSAGE XSCT Command: [configparams force-mem-access 0], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.889
+!MESSAGE XSCT command with result: [configparams force-mem-access 0], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.957
+!MESSAGE XSCT Command: [targets -set -nocase -filter {name =~ "*A9*#0"}], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.978
+!MESSAGE XSCT command with result: [targets -set -nocase -filter {name =~ "*A9*#0"}], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.982
+!MESSAGE XSCT Command: [con], Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.999
+!MESSAGE XSCT command with result: [con], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system

@@ -26,6 +26,7 @@ def _parse_args() -> argparse.Namespace:
         type=Path,
         default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/yes.wav",
         help="Path to the source WAV file")
+
     parser.add_argument(
         "--output_bin",
         type=Path,

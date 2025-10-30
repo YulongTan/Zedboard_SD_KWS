@@ -48,3 +48,5 @@ timestamp=[2025-10-30 16:16:10], mode=BUILD, duration=0:00:00.576, duration_ms=5
 timestamp=[2025-10-30 16:16:18], mode=BUILD, duration=0:00:08.384, duration_ms=8384, data={name=SD_read_out_system, configuration=Debug, clean_build=false}
 timestamp=[2025-10-30 16:20:39], mode=BUILD, duration=0:00:01.286, duration_ms=1286, data={name=SD_read_out, configuration=Debug, clean_build=false}
 timestamp=[2025-10-30 16:20:48], mode=BUILD, duration=0:00:08.288, duration_ms=8288, data={name=SD_read_out_system, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:32:08], mode=BUILD, duration=0:00:00.539, duration_ms=539, data={name=SD_read_out, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:32:17], mode=BUILD, duration=0:00:08.596, duration_ms=8596, data={name=SD_read_out_system, configuration=Debug, clean_build=false}

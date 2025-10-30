@@ -1,4 +1,4 @@
-16:20:39 **** Incremental Build of configuration Debug for project SD_read_out_system ****
+16:32:08 **** Incremental Build of configuration Debug for project SD_read_out_system ****
 make all 
 Generating bif file for the system project
 generate_system_bif.bat 9006 D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/SD_read.xpfm standalone_domain D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out_system/Debug/system.bif
@@ -6,5 +6,5 @@ sdcard_gen --xpfm D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/ex
 creating BOOT.BIN using D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
 Running D:/Vitis/Vitis/2022.1/bin/bootgen  -image D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
 
-16:20:48 Build Finished (took 8s.271ms)
+16:32:17 Build Finished (took 8s.584ms)
 
