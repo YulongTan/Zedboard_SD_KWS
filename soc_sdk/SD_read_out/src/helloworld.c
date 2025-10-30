@@ -30,9 +30,8 @@
 /************************** Function Prototypes ******************************/
 
 /************************** Variable Definitions *****************************/
-// 指定音频MEM位置
 #ifndef MEM_BASE_ADDR
-#define MEM_BASE_ADDR		( XPAR_DDR_MEM_BASEADDR + 0x10000000 )
+#define MEM_BASE_ADDR		XPAR_DDR_MEM_BASEADDR
 #endif
 
 #define AUDIO_SAMPLING_RATE	  KWS_SOURCE_SAMPLE_RATE
@@ -42,13 +41,15 @@
 #define AUDIO_BUFFER_BYTES	  ((size_t)NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE * AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES)
 #define NR_AUDIO_SAMPLES	  (NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE)
 
-// read input audio
-#define KWS_AUDIO_BIN_PATH	  "yes.bin"
+/* FatFs names the first SD card as drive "0:". Keep audio.bin in the
+ * root directory or adjust this path to match your layout.
+ */
+#define KWS_AUDIO_BIN_PATH	  "0:/audio.bin"
 
-//static XStatus LoadAudioFromSd(const char *path,
-//			       void *dst,
-//			       size_t dst_capacity,
-//			       size_t *out_frames);
+static XStatus LoadAudioFromSd(const char *path,
+			       void *dst,
+			       size_t dst_capacity,
+			       size_t *out_frames);
 /************************** Buffer Setting *****************************/
 
 

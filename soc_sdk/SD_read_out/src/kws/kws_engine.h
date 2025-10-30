@@ -10,8 +10,11 @@
 extern "C" {
 #endif
 
+/* Drive prefix "0:" refers to the first FatFs volume (SD card).
+ * Store kws_weights.bin at the root level or adjust this path.
+ */
 #define KWS_SD_MOUNT_POINT      "0:/"
-#define KWS_DEFAULT_WEIGHT_PATH "0:/kws/kws_weights.bin"
+#define KWS_DEFAULT_WEIGHT_PATH "0:/kws_weights.bin"
 
 #define KWS_SOURCE_SAMPLE_RATE   16000U
 #define KWS_SOURCE_CHANNELS      1U
