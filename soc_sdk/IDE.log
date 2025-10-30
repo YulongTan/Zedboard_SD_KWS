@@ -88,3 +88,342 @@ con
 
 20:01:46 INFO  : Launch script is exported to file 'D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read_out_system\_ide\scripts\systemdebugger_sd_read_out_system_standalone.tcl'
 20:06:15 INFO  : Disconnected from the channel tcfchan#4.
+18:53:42 DEBUG : Logs will be stored at 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/IDE.log'.
+18:53:43 INFO  : Launching XSCT server: xsct.bat -n  -interactive D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\temp_xsdb_launch_script.tcl
+18:53:48 INFO  : XSCT server has started successfully.
+18:53:48 INFO  : plnx-install-location is set to ''
+18:53:48 INFO  : Successfully done setting XSCT server connection channel  
+18:53:48 INFO  : Successfully done setting workspace for the tool. 
+18:53:53 INFO  : Registering command handlers for Vitis TCF services
+18:53:53 INFO  : Platform repository initialization has completed.
+18:53:53 INFO  : Successfully done query RDI_DATADIR 
+15:46:18 INFO  : Result from executing command 'getProjects': SD_read
+15:46:18 INFO  : Result from executing command 'getPlatforms': SD_read|D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/SD_read.xpfm;xilinx_zcu102_base_202210_1|D:/Vitis/Vitis/2022.1/base_platforms/xilinx_zcu102_base_202210_1/xilinx_zcu102_base_202210_1.xpfm;xilinx_zcu102_base_dfx_202210_1|D:/Vitis/Vitis/2022.1/base_platforms/xilinx_zcu102_base_dfx_202210_1/xilinx_zcu102_base_dfx_202210_1.xpfm;xilinx_zcu104_base_202210_1|D:/Vitis/Vitis/2022.1/base_platforms/xilinx_zcu104_base_202210_1/xilinx_zcu104_base_202210_1.xpfm
+15:46:43 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+15:53:02 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+15:53:57 ERROR : (XRT Server)D:/Vitis/Vitis/2022.1/bin/unwrapped/win64.o/xrt_server.exe: error: illegal option '-'
+Usage: agent [OPTION]...
+Start Target Communication Framework agent.
+  -d               run in daemon mode (output is sent to system logger)
+  -i               run in interactive mode
+  -L<file>         enable logging, use -L- to send log to stderr
+  -l<level>        set log level, the level is comma separated list of:
+      alloc        memory allocation and deallocation (0x1)
+      eventcore    main event queue (0x2)
+      waitpid      waitpid() events (0x4)
+      events       low-level debugger events (0x8)
+      protocol     communication protocol (0x20)
+      context      debug context actions (0x40)
+      children     debug context children (0x10)
+      discovery    discovery (0x80)
+      asyncreq     async I/O (0x100)
+      proxy        proxy state (0x200)
+      tcflog       proxy traffic (0x400)
+      elf          ELF reader (0x800)
+      stack        stack trace service (0x2000)
+      plugin       plugins (0x4000)
+      shutdown     shutdown of subsystems (0x8000)
+      disasm       disassembly service (0x10000)
+  -s<url>          set agent listening port and protocol, default is tcp::0
+  -S               print server properties in Json format to stdout
+  -g<port>         start GDB Remote Serial Protocol server at the specified TCP port
+  -I<idle-seconds> exit if there are no connections for the specified time
+
+15:54:57 ERROR : Timed out. 60 seconds have elapsed while waiting for the XRT server to launch.
+15:54:59 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+15:55:00 INFO  : Jtag cable 'Digilent Zed 210248B77C6C' is selected.
+15:55:00 INFO  : 'jtag frequency' command is executed.
+15:55:00 INFO  : Context for 'APU' is selected.
+15:55:00 INFO  : System reset is completed.
+15:55:03 INFO  : 'after 3000' command is executed.
+15:55:03 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}' command is executed.
+15:55:05 INFO  : Device configured successfully with "D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit"
+15:55:05 INFO  : Context for 'APU' is selected.
+15:55:06 INFO  : Hardware design and registers information is loaded from 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa'.
+15:55:06 INFO  : 'configparams force-mem-access 1' command is executed.
+15:55:06 INFO  : Context for 'APU' is selected.
+15:55:06 INFO  : Sourcing of 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl' is done.
+15:55:06 INFO  : 'ps7_init' command is executed.
+15:55:06 INFO  : 'ps7_post_config' command is executed.
+15:55:06 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+15:55:06 INFO  : The application 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf' is downloaded to processor 'ps7_cortexa9_0'.
+15:55:06 INFO  : 'configparams force-mem-access 0' command is executed.
+15:55:06 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+targets -set -nocase -filter {name =~"APU*"}
+rst -system
+after 3000
+targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}
+fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
+targets -set -nocase -filter {name =~"APU*"}
+loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs
+configparams force-mem-access 1
+targets -set -nocase -filter {name =~"APU*"}
+source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl
+ps7_init
+ps7_post_config
+targets -set -nocase -filter {name =~ "*A9*#0"}
+dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf
+configparams force-mem-access 0
+----------------End of Script----------------
+
+15:55:06 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+15:55:06 INFO  : 'con' command is executed.
+15:55:06 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "*A9*#0"}
+con
+----------------End of Script----------------
+
+15:55:06 INFO  : Launch script is exported to file 'D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read_out_system\_ide\scripts\systemdebugger_sd_read_out_system_standalone.tcl'
+16:02:19 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:03:00 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:03:24 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:04:08 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:05:20 INFO  : Disconnected from the channel tcfchan#3.
+16:05:21 ERROR : (XRT Server)D:/Vitis/Vitis/2022.1/bin/unwrapped/win64.o/xrt_server.exe: error: illegal option '-'
+Usage: agent [OPTION]...
+Start Target Communication Framework agent.
+  -d               run in daemon mode (output is sent to system logger)
+  -i               run in interactive mode
+  -L<file>         enable logging, use -L- to send log to stderr
+  -l<level>        set log level, the level is comma separated list of:
+      alloc        memory allocation and deallocation (0x1)
+      eventcore    main event queue (0x2)
+      waitpid      waitpid() events (0x4)
+      events       low-level debugger events (0x8)
+      protocol     communication protocol (0x20)
+      context      debug context actions (0x40)
+      children     debug context children (0x10)
+      discovery    discovery (0x80)
+      asyncreq     async I/O (0x100)
+      proxy        proxy state (0x200)
+      tcflog       proxy traffic (0x400)
+      elf          ELF reader (0x800)
+      stack        stack trace service (0x2000)
+      plugin       plugins (0x4000)
+      shutdown     shutdown of subsystems (0x8000)
+      disasm       disassembly service (0x10000)
+  -s<url>          set agent listening port and protocol, default is tcp::0
+  -S               print server properties in Json format to stdout
+  -g<port>         start GDB Remote Serial Protocol server at the specified TCP port
+  -I<idle-seconds> exit if there are no connections for the specified time
+
+16:06:21 ERROR : Timed out. 60 seconds have elapsed while waiting for the XRT server to launch.
+16:06:23 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+16:06:23 INFO  : Jtag cable 'Digilent Zed 210248B77C6C' is selected.
+16:06:23 INFO  : 'jtag frequency' command is executed.
+16:06:23 INFO  : Context for 'APU' is selected.
+16:06:24 INFO  : System reset is completed.
+16:06:27 INFO  : 'after 3000' command is executed.
+16:06:27 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}' command is executed.
+16:06:29 INFO  : Device configured successfully with "D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit"
+16:06:29 INFO  : Context for 'APU' is selected.
+16:06:29 INFO  : Hardware design and registers information is loaded from 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa'.
+16:06:29 INFO  : 'configparams force-mem-access 1' command is executed.
+16:06:29 INFO  : Context for 'APU' is selected.
+16:06:29 INFO  : Sourcing of 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl' is done.
+16:06:29 INFO  : 'ps7_init' command is executed.
+16:06:29 INFO  : 'ps7_post_config' command is executed.
+16:06:29 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:06:30 INFO  : The application 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf' is downloaded to processor 'ps7_cortexa9_0'.
+16:06:30 INFO  : 'configparams force-mem-access 0' command is executed.
+16:06:30 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+targets -set -nocase -filter {name =~"APU*"}
+rst -system
+after 3000
+targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}
+fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
+targets -set -nocase -filter {name =~"APU*"}
+loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs
+configparams force-mem-access 1
+targets -set -nocase -filter {name =~"APU*"}
+source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl
+ps7_init
+ps7_post_config
+targets -set -nocase -filter {name =~ "*A9*#0"}
+dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf
+configparams force-mem-access 0
+----------------End of Script----------------
+
+16:06:30 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:06:30 INFO  : 'con' command is executed.
+16:06:30 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "*A9*#0"}
+con
+----------------End of Script----------------
+
+16:06:30 INFO  : Launch script is exported to file 'D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read_out_system\_ide\scripts\systemdebugger_sd_read_out_system_standalone.tcl'
+16:10:40 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:11:08 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:11:20 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:11:39 INFO  : Disconnected from the channel tcfchan#5.
+16:11:40 ERROR : (XRT Server)D:/Vitis/Vitis/2022.1/bin/unwrapped/win64.o/xrt_server.exe: error: illegal option '-'
+Usage: agent [OPTION]...
+Start Target Communication Framework agent.
+  -d               run in daemon mode (output is sent to system logger)
+  -i               run in interactive mode
+  -L<file>         enable logging, use -L- to send log to stderr
+  -l<level>        set log level, the level is comma separated list of:
+      alloc        memory allocation and deallocation (0x1)
+      eventcore    main event queue (0x2)
+      waitpid      waitpid() events (0x4)
+      events       low-level debugger events (0x8)
+      protocol     communication protocol (0x20)
+      context      debug context actions (0x40)
+      children     debug context children (0x10)
+      discovery    discovery (0x80)
+      asyncreq     async I/O (0x100)
+      proxy        proxy state (0x200)
+      tcflog       proxy traffic (0x400)
+      elf          ELF reader (0x800)
+      stack        stack trace service (0x2000)
+      plugin       plugins (0x4000)
+      shutdown     shutdown of subsystems (0x8000)
+      disasm       disassembly service (0x10000)
+  -s<url>          set agent listening port and protocol, default is tcp::0
+  -S               print server properties in Json format to stdout
+  -g<port>         start GDB Remote Serial Protocol server at the specified TCP port
+  -I<idle-seconds> exit if there are no connections for the specified time
+
+16:12:40 ERROR : Timed out. 60 seconds have elapsed while waiting for the XRT server to launch.
+16:12:42 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+16:12:42 INFO  : Jtag cable 'Digilent Zed 210248B77C6C' is selected.
+16:12:42 INFO  : 'jtag frequency' command is executed.
+16:12:42 INFO  : Context for 'APU' is selected.
+16:12:42 INFO  : System reset is completed.
+16:12:45 INFO  : 'after 3000' command is executed.
+16:12:45 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}' command is executed.
+16:12:48 INFO  : Device configured successfully with "D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit"
+16:12:48 INFO  : Context for 'APU' is selected.
+16:12:48 INFO  : Hardware design and registers information is loaded from 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa'.
+16:12:48 INFO  : 'configparams force-mem-access 1' command is executed.
+16:12:48 INFO  : Context for 'APU' is selected.
+16:12:48 INFO  : Sourcing of 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl' is done.
+16:12:48 INFO  : 'ps7_init' command is executed.
+16:12:48 INFO  : 'ps7_post_config' command is executed.
+16:12:48 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:12:48 INFO  : The application 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf' is downloaded to processor 'ps7_cortexa9_0'.
+16:12:49 INFO  : 'configparams force-mem-access 0' command is executed.
+16:12:49 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+targets -set -nocase -filter {name =~"APU*"}
+rst -system
+after 3000
+targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}
+fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
+targets -set -nocase -filter {name =~"APU*"}
+loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs
+configparams force-mem-access 1
+targets -set -nocase -filter {name =~"APU*"}
+source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl
+ps7_init
+ps7_post_config
+targets -set -nocase -filter {name =~ "*A9*#0"}
+dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf
+configparams force-mem-access 0
+----------------End of Script----------------
+
+16:12:49 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:12:49 INFO  : 'con' command is executed.
+16:12:49 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "*A9*#0"}
+con
+----------------End of Script----------------
+
+16:12:49 INFO  : Launch script is exported to file 'D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read_out_system\_ide\scripts\systemdebugger_sd_read_out_system_standalone.tcl'
+16:20:42 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:21:09 INFO  : Disconnected from the channel tcfchan#9.
+16:21:10 ERROR : (XRT Server)D:/Vitis/Vitis/2022.1/bin/unwrapped/win64.o/xrt_server.exe: error: illegal option '-'
+Usage: agent [OPTION]...
+Start Target Communication Framework agent.
+  -d               run in daemon mode (output is sent to system logger)
+  -i               run in interactive mode
+  -L<file>         enable logging, use -L- to send log to stderr
+  -l<level>        set log level, the level is comma separated list of:
+      alloc        memory allocation and deallocation (0x1)
+      eventcore    main event queue (0x2)
+      waitpid      waitpid() events (0x4)
+      events       low-level debugger events (0x8)
+      protocol     communication protocol (0x20)
+      context      debug context actions (0x40)
+      children     debug context children (0x10)
+      discovery    discovery (0x80)
+      asyncreq     async I/O (0x100)
+      proxy        proxy state (0x200)
+      tcflog       proxy traffic (0x400)
+      elf          ELF reader (0x800)
+      stack        stack trace service (0x2000)
+      plugin       plugins (0x4000)
+      shutdown     shutdown of subsystems (0x8000)
+      disasm       disassembly service (0x10000)
+  -s<url>          set agent listening port and protocol, default is tcp::0
+  -S               print server properties in Json format to stdout
+  -g<port>         start GDB Remote Serial Protocol server at the specified TCP port
+  -I<idle-seconds> exit if there are no connections for the specified time
+
+16:22:10 ERROR : Timed out. 60 seconds have elapsed while waiting for the XRT server to launch.
+16:22:12 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+16:22:12 INFO  : Jtag cable 'Digilent Zed 210248B77C6C' is selected.
+16:22:12 INFO  : 'jtag frequency' command is executed.
+16:22:12 INFO  : Context for 'APU' is selected.
+16:22:13 INFO  : System reset is completed.
+16:22:16 INFO  : 'after 3000' command is executed.
+16:22:16 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}' command is executed.
+16:22:18 INFO  : Device configured successfully with "D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit"
+16:22:18 INFO  : Context for 'APU' is selected.
+16:22:18 INFO  : Hardware design and registers information is loaded from 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa'.
+16:22:18 INFO  : 'configparams force-mem-access 1' command is executed.
+16:22:18 INFO  : Context for 'APU' is selected.
+16:22:18 INFO  : Sourcing of 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl' is done.
+16:22:18 INFO  : 'ps7_init' command is executed.
+16:22:18 INFO  : 'ps7_post_config' command is executed.
+16:22:18 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:22:19 INFO  : The application 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf' is downloaded to processor 'ps7_cortexa9_0'.
+16:22:19 INFO  : 'configparams force-mem-access 0' command is executed.
+16:22:19 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+targets -set -nocase -filter {name =~"APU*"}
+rst -system
+after 3000
+targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}
+fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
+targets -set -nocase -filter {name =~"APU*"}
+loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs
+configparams force-mem-access 1
+targets -set -nocase -filter {name =~"APU*"}
+source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl
+ps7_init
+ps7_post_config
+targets -set -nocase -filter {name =~ "*A9*#0"}
+dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf
+configparams force-mem-access 0
+----------------End of Script----------------
+
+16:22:19 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:22:19 INFO  : 'con' command is executed.
+16:22:19 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "*A9*#0"}
+con
+----------------End of Script----------------
+
+16:22:19 INFO  : Launch script is exported to file 'D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read_out_system\_ide\scripts\systemdebugger_sd_read_out_system_standalone.tcl'
+09:26:18 INFO  : Disconnected from the channel tcfchan#11.
+09:30:41 DEBUG : Logs will be stored at 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/IDE.log'.
+09:30:42 INFO  : Launching XSCT server: xsct.bat -n  -interactive D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\temp_xsdb_launch_script.tcl
+09:30:46 INFO  : XSCT server has started successfully.
+09:30:46 INFO  : Successfully done setting XSCT server connection channel  
+09:30:46 INFO  : plnx-install-location is set to ''
+09:30:46 INFO  : Successfully done setting workspace for the tool. 
+09:30:47 INFO  : Platform repository initialization has completed.
+09:30:47 INFO  : Registering command handlers for Vitis TCF services
+09:30:48 INFO  : Successfully done query RDI_DATADIR 
+09:36:19 DEBUG : Logs will be stored at 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/IDE.log'.
+09:36:21 INFO  : Launching XSCT server: xsct.bat -n  -interactive D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\temp_xsdb_launch_script.tcl
+09:36:26 INFO  : XSCT server has started successfully.
+09:36:26 INFO  : Successfully done setting XSCT server connection channel  
+09:36:26 INFO  : plnx-install-location is set to ''
+09:36:26 INFO  : Successfully done setting workspace for the tool. 
+09:36:27 INFO  : Platform repository initialization has completed.
+09:36:27 INFO  : Successfully done query RDI_DATADIR 
+09:36:27 INFO  : Registering command handlers for Vitis TCF services
