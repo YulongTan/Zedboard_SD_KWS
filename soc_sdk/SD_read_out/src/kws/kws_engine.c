@@ -21,7 +21,6 @@
 #define KWS_WEIGHT_MAGIC   0x4B575331u /* 'KWS1' */
 #define KWS_WEIGHT_VERSION 0x00010000u
 
-#define KWS_SOURCE_SAMPLE_RATE 96000U
 #define KWS_DECIMATION_FACTOR  (KWS_SOURCE_SAMPLE_RATE / KWS_TARGET_SAMPLE_RATE)
 #define KWS_REQUIRED_SOURCE_FRAMES (KWS_TARGET_SAMPLE_RATE * KWS_DECIMATION_FACTOR)
 
@@ -119,7 +118,7 @@ static XStatus mount_sd_if_needed(void);
 static XStatus load_weights(const char *path);
 static XStatus allocate_scratch(void);
 static void init_feature_tables(void);
-static XStatus extract_logmel(const int32_t *stereo_buffer,
+static XStatus extract_logmel(const int32_t *source_buffer,
                               size_t frames_per_channel,
                               float *out_tensor);
 static void conv2d_forward(const float *input,
@@ -202,7 +201,12 @@ int KwsEngine_IsReady(void)
     return gEngineReady;
 }
 
-XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
+XStatus KwsEngine_MountSd(void)
+{
+    return mount_sd_if_needed();
+}
+
+XStatus KwsEngine_ProcessRecording(const int32_t *source_buffer,
                                    size_t frames_per_channel,
                                    u32 *out_class_index,
                                    float *out_confidence)
@@ -211,7 +215,7 @@ XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
         return XST_FAILURE;
     }
 
-    if (stereo_buffer == NULL) {
+    if (source_buffer == NULL) {
         return XST_FAILURE;
     }
 
@@ -221,7 +225,7 @@ XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
         return XST_FAILURE;
     }
 
-    if (extract_logmel(stereo_buffer, frames_per_channel, gScratch.input_tensor) != XST_SUCCESS) {
+    if (extract_logmel(source_buffer, frames_per_channel, gScratch.input_tensor) != XST_SUCCESS) {
         xil_printf("KWS: feature extraction failed\r\n");
         return XST_FAILURE;
     }
@@ -561,23 +565,32 @@ static void init_feature_tables(void)
     gFeatureTables.initialized = 1;
 }
 
-static XStatus extract_logmel(const int32_t *stereo_buffer,
+static XStatus extract_logmel(const int32_t *source_buffer,
                               size_t frames_per_channel,
                               float *out_tensor)
 {
-    (void)frames_per_channel;
-
     const size_t decimation = KWS_DECIMATION_FACTOR;
     const size_t mono_samples = KWS_TARGET_SAMPLE_RATE;
+    const size_t channels = KWS_SOURCE_CHANNELS;
+
+    if (channels == 0U) {
+        return XST_FAILURE;
+    }
 
     for (size_t i = 0U; i < mono_samples; ++i) {
         size_t start = i * decimation;
         double acc = 0.0;
         for (size_t j = 0U; j < decimation; ++j) {
-            size_t idx = (start + j);
-            int32_t left = stereo_buffer[idx * 2U];
-            int32_t right = stereo_buffer[idx * 2U + 1U];
-            acc += ((double)left + (double)right) * 0.5;
+            size_t frame_idx = start + j;
+            if (frame_idx >= frames_per_channel) {
+                return XST_FAILURE;
+            }
+            size_t base = frame_idx * channels;
+            double frame_sum = 0.0;
+            for (size_t ch = 0U; ch < channels; ++ch) {
+                frame_sum += (double)source_buffer[base + ch];
+            }
+            acc += frame_sum / (double)channels;
         }
         double norm = acc / (double)decimation;
         gScratch.mono_buffer[i] = (float)(norm / 2147483648.0);
