@@ -14,7 +14,11 @@
 #include "xil_printf.h"
 #include "xil_cache.h"
 #include "xsdps.h"			/* SD device driver */
+#include "xtime_l.h"
 #include "ff.h"
+#include <stdlib.h>   // 提供 rand(), srand(), RAND_MAX
+#include <time.h>     // 若需要 srand(time(NULL))
+
 //kws network
 #include "./kws/kws_engine.h"
 /************************** Constant Definitions *****************************/
@@ -26,8 +30,9 @@
 /************************** Function Prototypes ******************************/
 
 /************************** Variable Definitions *****************************/
+// 指定音频MEM位置
 #ifndef MEM_BASE_ADDR
-#define MEM_BASE_ADDR		XPAR_DDR_MEM_BASEADDR
+#define MEM_BASE_ADDR		( XPAR_DDR_MEM_BASEADDR + 0x10000000 )
 #endif
 
 #define AUDIO_SAMPLING_RATE	  KWS_SOURCE_SAMPLE_RATE
@@ -39,17 +44,23 @@
 
 #define KWS_AUDIO_BIN_PATH	  "0:/kws/audio.bin"
 
-static XStatus LoadAudioFromSd(const char *path,
-			       void *dst,
-			       size_t dst_capacity,
-			       size_t *out_frames);
+//static XStatus LoadAudioFromSd(const char *path,
+//			       void *dst,
+//			       size_t dst_capacity,
+//			       size_t *out_frames);
 /************************** Buffer Setting *****************************/
+
+
+
+/**************************************************************************/
 
 int main(void)
 {
 	int Status;
 
 	xil_printf("\r\n--- Entering main() --- \r\n");
+
+
 
 	Status = KwsEngine_Initialize(KWS_DEFAULT_WEIGHT_PATH);
 

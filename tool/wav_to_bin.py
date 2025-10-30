@@ -21,10 +21,15 @@ def _parse_args() -> argparse.Namespace:
             "suitable for loading into the Zynq DDR buffer used by the KWS demo."
         )
     )
-    parser.add_argument("input_wav", type=Path, help="Path to the source WAV file")
     parser.add_argument(
-        "output_bin",
+        "--input_wav",
         type=Path,
+        default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/yes.wav",
+        help="Path to the source WAV file")
+    parser.add_argument(
+        "--output_bin",
+        type=Path,
+        default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/yes.bin",
         help=(
             "Destination path for the generated binary PCM file. "
             "Will be overwritten if it already exists."
