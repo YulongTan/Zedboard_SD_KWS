@@ -30,6 +30,7 @@ extern "C" {
 XStatus KwsEngine_Initialize(const char *weight_file_path);
 void    KwsEngine_Shutdown(void);
 int     KwsEngine_IsReady(void);
+XStatus KwsEngine_MountSd(void);
 XStatus KwsEngine_ProcessRecording(const int32_t *source_buffer,
                                    size_t frames_per_channel,
                                    u32 *out_class_index,

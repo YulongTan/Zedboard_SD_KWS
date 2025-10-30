@@ -30,8 +30,15 @@
 /************************** Function Prototypes ******************************/
 
 /************************** Variable Definitions *****************************/
+#ifndef MEM_AUDIO_OFFSET
+/* Leave headroom at the DDR base for program sections and reuse a
+ * dedicated window for streaming audio frames.
+ */
+#define MEM_AUDIO_OFFSET	0x01000000U
+#endif
+
 #ifndef MEM_BASE_ADDR
-#define MEM_BASE_ADDR		XPAR_DDR_MEM_BASEADDR
+#define MEM_BASE_ADDR		(XPAR_DDR_MEM_BASEADDR + MEM_AUDIO_OFFSET)
 #endif
 
 #define AUDIO_SAMPLING_RATE	  KWS_SOURCE_SAMPLE_RATE
@@ -119,15 +126,20 @@ int main(void)
 }
 
 static XStatus LoadAudioFromSd(const char *path,
-			       void *dst,
-			       size_t dst_capacity,
-			       size_t *out_frames)
+                              void *dst,
+                              size_t dst_capacity,
+                              size_t *out_frames)
 {
-	FIL fil;
-	FRESULT res = f_open(&fil, path, FA_READ);
-	if (res != FR_OK) {
-		xil_printf("\r\nf_open(%s) failed with error %d\r\n", path, (int)res);
-		return XST_FAILURE;
+        if (KwsEngine_MountSd() != XST_SUCCESS) {
+                xil_printf("\r\nFailed to mount SD card before reading %s\r\n", path);
+                return XST_FAILURE;
+        }
+
+        FIL fil;
+        FRESULT res = f_open(&fil, path, FA_READ);
+        if (res != FR_OK) {
+                xil_printf("\r\nf_open(%s) failed with error %d\r\n", path, (int)res);
+                return XST_FAILURE;
 	}
 
 	const size_t bytes_per_frame = AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES;

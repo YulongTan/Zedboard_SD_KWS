@@ -201,6 +201,11 @@ int KwsEngine_IsReady(void)
     return gEngineReady;
 }
 
+XStatus KwsEngine_MountSd(void)
+{
+    return mount_sd_if_needed();
+}
+
 XStatus KwsEngine_ProcessRecording(const int32_t *source_buffer,
                                    size_t frames_per_channel,
                                    u32 *out_class_index,
