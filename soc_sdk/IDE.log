@@ -427,3 +427,90 @@ con
 09:36:27 INFO  : Platform repository initialization has completed.
 09:36:27 INFO  : Successfully done query RDI_DATADIR 
 09:36:27 INFO  : Registering command handlers for Vitis TCF services
+16:14:38 DEBUG : Logs will be stored at 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/IDE.log'.
+16:14:39 INFO  : Launching XSCT server: xsct.bat -n  -interactive D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\temp_xsdb_launch_script.tcl
+16:14:43 INFO  : XSCT server has started successfully.
+16:14:43 INFO  : Successfully done setting XSCT server connection channel  
+16:14:43 INFO  : plnx-install-location is set to ''
+16:14:43 INFO  : Successfully done setting workspace for the tool. 
+16:14:45 INFO  : Platform repository initialization has completed.
+16:14:45 INFO  : Successfully done query RDI_DATADIR 
+16:14:46 INFO  : Registering command handlers for Vitis TCF services
+16:15:48 INFO  : Result from executing command 'getProjects': SD_read
+16:15:48 INFO  : Result from executing command 'getPlatforms': xilinx_zcu102_base_202210_1|D:/Vitis/Vitis/2022.1/base_platforms/xilinx_zcu102_base_202210_1/xilinx_zcu102_base_202210_1.xpfm;xilinx_zcu102_base_dfx_202210_1|D:/Vitis/Vitis/2022.1/base_platforms/xilinx_zcu102_base_dfx_202210_1/xilinx_zcu102_base_dfx_202210_1.xpfm;xilinx_zcu104_base_202210_1|D:/Vitis/Vitis/2022.1/base_platforms/xilinx_zcu104_base_202210_1/xilinx_zcu104_base_202210_1.xpfm
+16:15:53 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:16:09 INFO  : Checking for BSP changes to sync application flags for project 'SD_read_out'...
+16:16:43 ERROR : (XRT Server)D:/Vitis/Vitis/2022.1/bin/unwrapped/win64.o/xrt_server.exe: error: illegal option '-'
+Usage: agent [OPTION]...
+Start Target Communication Framework agent.
+  -d               run in daemon mode (output is sent to system logger)
+  -i               run in interactive mode
+  -L<file>         enable logging, use -L- to send log to stderr
+  -l<level>        set log level, the level is comma separated list of:
+      alloc        memory allocation and deallocation (0x1)
+      eventcore    main event queue (0x2)
+      waitpid      waitpid() events (0x4)
+      events       low-level debugger events (0x8)
+      protocol     communication protocol (0x20)
+      context      debug context actions (0x40)
+      children     debug context children (0x10)
+      discovery    discovery (0x80)
+      asyncreq     async I/O (0x100)
+      proxy        proxy state (0x200)
+      tcflog       proxy traffic (0x400)
+      elf          ELF reader (0x800)
+      stack        stack trace service (0x2000)
+      plugin       plugins (0x4000)
+      shutdown     shutdown of subsystems (0x8000)
+      disasm       disassembly service (0x10000)
+  -s<url>          set agent listening port and protocol, default is tcp::0
+  -S               print server properties in Json format to stdout
+  -g<port>         start GDB Remote Serial Protocol server at the specified TCP port
+  -I<idle-seconds> exit if there are no connections for the specified time
+
+16:17:42 ERROR : Timed out. 60 seconds have elapsed while waiting for the XRT server to launch.
+16:17:45 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+16:17:46 INFO  : Jtag cable 'Digilent Zed 210248B77C6C' is selected.
+16:17:46 INFO  : 'jtag frequency' command is executed.
+16:17:46 INFO  : Context for 'APU' is selected.
+16:17:46 INFO  : System reset is completed.
+16:17:49 INFO  : 'after 3000' command is executed.
+16:17:49 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}' command is executed.
+16:17:51 INFO  : Device configured successfully with "D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit"
+16:17:51 INFO  : Context for 'APU' is selected.
+16:17:51 INFO  : Hardware design and registers information is loaded from 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa'.
+16:17:51 INFO  : 'configparams force-mem-access 1' command is executed.
+16:17:51 INFO  : Context for 'APU' is selected.
+16:17:51 INFO  : Sourcing of 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl' is done.
+16:17:52 INFO  : 'ps7_init' command is executed.
+16:17:52 INFO  : 'ps7_post_config' command is executed.
+16:17:52 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:17:52 INFO  : The application 'D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf' is downloaded to processor 'ps7_cortexa9_0'.
+16:17:52 INFO  : 'configparams force-mem-access 0' command is executed.
+16:17:52 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+targets -set -nocase -filter {name =~"APU*"}
+rst -system
+after 3000
+targets -set -filter {jtag_cable_name =~ "Digilent Zed 210248B77C6C" && level==0 && jtag_device_ctx=="jsn-Zed-210248B77C6C-23727093-0"}
+fpga -file D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
+targets -set -nocase -filter {name =~"APU*"}
+loadhw -hw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs
+configparams force-mem-access 1
+targets -set -nocase -filter {name =~"APU*"}
+source D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/psinit/ps7_init.tcl
+ps7_init
+ps7_post_config
+targets -set -nocase -filter {name =~ "*A9*#0"}
+dow D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf
+configparams force-mem-access 0
+----------------End of Script----------------
+
+16:17:52 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+16:17:52 INFO  : 'con' command is executed.
+16:17:52 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "*A9*#0"}
+con
+----------------End of Script----------------
+
+16:17:52 INFO  : Launch script is exported to file 'D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read_out_system\_ide\scripts\systemdebugger_sd_read_out_system_standalone.tcl'

@@ -38,3 +38,13 @@ timestamp=[2025-10-30 09:30:47], mode=PLATFORM_REPOSITORY_INIT, duration=0:00:00
 timestamp=[2025-10-30 09:36:25], mode=WORKBENCH_START, duration=0:00:12.697, duration_ms=12697, data={}
 timestamp=[2025-10-30 09:36:26], mode=WORKBENCH_UI_INIT, duration=0:00:01.290, duration_ms=1290, data={editors_count=7, platform_editors_count=2, projects_count=4, platform_projects_count=1, active_platform_editor=false, projects=RemoteSystemsTempFiles,SD_read,SD_read_out,SD_read_out_system}
 timestamp=[2025-10-30 09:36:27], mode=PLATFORM_REPOSITORY_INIT, duration=0:00:00.338, duration_ms=338, data={}
+timestamp=[2025-10-30 16:14:43], mode=WORKBENCH_START, duration=0:00:11.064, duration_ms=11064, data={}
+timestamp=[2025-10-30 16:14:45], mode=WORKBENCH_UI_INIT, duration=0:00:01.541, duration_ms=1541, data={editors_count=7, platform_editors_count=2, projects_count=4, platform_projects_count=1, active_platform_editor=false, projects=RemoteSystemsTempFiles,SD_read,SD_read_out,SD_read_out_system}
+timestamp=[2025-10-30 16:14:45], mode=PLATFORM_REPOSITORY_INIT, duration=0:00:00.321, duration_ms=321, data={}
+timestamp=[2025-10-30 16:15:48], mode=PLATFORM_GENERATION, duration=0:00:17.830, duration_ms=17830, data={name=SD_read}
+timestamp=[2025-10-30 16:15:57], mode=BUILD, duration=0:00:01.396, duration_ms=1396, data={name=SD_read_out, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:16:06], mode=BUILD, duration=0:00:08.454, duration_ms=8454, data={name=SD_read_out_system, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:16:10], mode=BUILD, duration=0:00:00.576, duration_ms=576, data={name=SD_read_out, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:16:18], mode=BUILD, duration=0:00:08.384, duration_ms=8384, data={name=SD_read_out_system, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:20:39], mode=BUILD, duration=0:00:01.286, duration_ms=1286, data={name=SD_read_out, configuration=Debug, clean_build=false}
+timestamp=[2025-10-30 16:20:48], mode=BUILD, duration=0:00:08.288, duration_ms=8288, data={name=SD_read_out_system, configuration=Debug, clean_build=false}

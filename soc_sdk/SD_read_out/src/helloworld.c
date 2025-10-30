@@ -53,12 +53,12 @@
  * path preserves compatibility with prior builds that used /kws/.
  */
 #ifndef KWS_AUDIO_BIN_PATH
-#define KWS_AUDIO_BIN_PATH	  "0:/audio.bin"
+#define KWS_AUDIO_BIN_PATH	  "0:/no.bin"
 #endif
 
 /* Legacy deployments stored audio.bin under /kws/. */
 #ifndef KWS_AUDIO_FALLBACK_PATH
-#define KWS_AUDIO_FALLBACK_PATH   "0:/kws/audio.bin"
+#define KWS_AUDIO_FALLBACK_PATH   "0:/kws/no.bin"
 #endif
 
 static XStatus LoadAudioFromSd(const char *path,
