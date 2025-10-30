@@ -42,7 +42,6 @@
 #define AUDIO_BUFFER_BYTES	  ((size_t)NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE * AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES)
 #define NR_AUDIO_SAMPLES	  (NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE)
 
-// read input audio
 #define KWS_AUDIO_BIN_PATH	  "yes.bin"
 
 //static XStatus LoadAudioFromSd(const char *path,
