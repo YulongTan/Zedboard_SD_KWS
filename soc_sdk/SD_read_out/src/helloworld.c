@@ -49,9 +49,17 @@
 #define NR_AUDIO_SAMPLES	  (NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE)
 
 /* FatFs names the first SD card as drive "0:". Keep audio.bin in the
- * root directory or adjust this path to match your layout.
+ * root directory or adjust this path to match your layout. The fallback
+ * path preserves compatibility with prior builds that used /kws/.
  */
+#ifndef KWS_AUDIO_BIN_PATH
 #define KWS_AUDIO_BIN_PATH	  "0:/audio.bin"
+#endif
+
+/* Legacy deployments stored audio.bin under /kws/. */
+#ifndef KWS_AUDIO_FALLBACK_PATH
+#define KWS_AUDIO_FALLBACK_PATH   "0:/kws/audio.bin"
+#endif
 
 static XStatus LoadAudioFromSd(const char *path,
 			       void *dst,
@@ -138,9 +146,20 @@ static XStatus LoadAudioFromSd(const char *path,
         FIL fil;
         FRESULT res = f_open(&fil, path, FA_READ);
         if (res != FR_OK) {
+                if (res == FR_NO_FILE && strcmp(path, KWS_AUDIO_BIN_PATH) == 0 &&
+                    strcmp(KWS_AUDIO_FALLBACK_PATH, KWS_AUDIO_BIN_PATH) != 0) {
+                        xil_printf("\r\n%s missing; retrying %s\r\n",
+                                   path,
+                                   KWS_AUDIO_FALLBACK_PATH);
+                        return LoadAudioFromSd(KWS_AUDIO_FALLBACK_PATH,
+                                               dst,
+                                               dst_capacity,
+                                               out_frames);
+                }
+
                 xil_printf("\r\nf_open(%s) failed with error %d\r\n", path, (int)res);
                 return XST_FAILURE;
-	}
+        }
 
 	const size_t bytes_per_frame = AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES;
 	FSIZE_t file_size = f_size(&fil);
