@@ -18,10 +18,10 @@
 #define M_PI_2 1.57079632679489661923
 #endif
 
-#define KWS_WEIGHT_MAGIC   0x4B575331u /* 'KWS1' */
-#define KWS_WEIGHT_VERSION 0x00010000u
+#define KWS_WEIGHT_MAGIC       0x4B575331u /* 'KWS1' */
+#define KWS_WEIGHT_VERSION_V1  0x00010000u
+#define KWS_WEIGHT_VERSION_V2  0x00020000u
 
-#define KWS_SOURCE_SAMPLE_RATE 96000U
 #define KWS_DECIMATION_FACTOR  (KWS_SOURCE_SAMPLE_RATE / KWS_TARGET_SAMPLE_RATE)
 #define KWS_REQUIRED_SOURCE_FRAMES (KWS_TARGET_SAMPLE_RATE * KWS_DECIMATION_FACTOR)
 
@@ -52,7 +52,18 @@ typedef struct {
 } __attribute__((packed)) KwsWeightHeader;
 
 typedef struct {
+    u32 conv1_out_channels;
+    u32 conv2_out_channels;
+    u32 conv3_out_channels;
+    u32 fc1_out_units;
+} __attribute__((packed)) KwsWeightLayout;
+
+typedef struct {
     u32 num_classes;
+    u32 conv1_out_channels;
+    u32 conv2_out_channels;
+    u32 conv3_out_channels;
+    u32 fc1_out_units;
     float *conv1_weights;
     float *conv1_bias;
     float *conv1_bn_scale;
@@ -119,7 +130,7 @@ static XStatus mount_sd_if_needed(void);
 static XStatus load_weights(const char *path);
 static XStatus allocate_scratch(void);
 static void init_feature_tables(void);
-static XStatus extract_logmel(const int32_t *stereo_buffer,
+static XStatus extract_logmel(const int32_t *source_buffer,
                               size_t frames_per_channel,
                               float *out_tensor);
 static void conv2d_forward(const float *input,
@@ -202,7 +213,12 @@ int KwsEngine_IsReady(void)
     return gEngineReady;
 }
 
-XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
+XStatus KwsEngine_MountSd(void)
+{
+    return mount_sd_if_needed();
+}
+
+XStatus KwsEngine_ProcessRecording(const int32_t *source_buffer,
                                    size_t frames_per_channel,
                                    u32 *out_class_index,
                                    float *out_confidence)
@@ -211,7 +227,7 @@ XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
         return XST_FAILURE;
     }
 
-    if (stereo_buffer == NULL) {
+    if (source_buffer == NULL) {
         return XST_FAILURE;
     }
 
@@ -221,7 +237,7 @@ XStatus KwsEngine_ProcessRecording(const int32_t *stereo_buffer,
         return XST_FAILURE;
     }
 
-    if (extract_logmel(stereo_buffer, frames_per_channel, gScratch.input_tensor) != XST_SUCCESS) {
+    if (extract_logmel(source_buffer, frames_per_channel, gScratch.input_tensor) != XST_SUCCESS) {
         xil_printf("KWS: feature extraction failed\r\n");
         return XST_FAILURE;
     }
@@ -354,7 +370,7 @@ static XStatus load_weights(const char *path)
         f_close(&fil);
         return XST_FAILURE;
     }
-    if (header.version != KWS_WEIGHT_VERSION) {
+    if (header.version != KWS_WEIGHT_VERSION_V1 && header.version != KWS_WEIGHT_VERSION_V2) {
         xil_printf("KWS: unsupported version 0x%08lx\r\n", (unsigned long)header.version);
         f_close(&fil);
         return XST_FAILURE;
@@ -366,28 +382,62 @@ static XStatus load_weights(const char *path)
     }
     gModel.num_classes = header.num_classes;
 
-    const size_t conv1_params = (size_t)KWS_CONV1_OUT_CH * KWS_INPUT_DEPTH * 3U * 3U;
-    const size_t conv2_params = (size_t)KWS_CONV2_OUT_CH * KWS_CONV1_OUT_CH * 3U * 3U;
-    const size_t conv3_params = (size_t)KWS_CONV3_OUT_CH * KWS_CONV2_OUT_CH * 3U * 3U;
-    const size_t fc1_params   = (size_t)KWS_FC1_OUT_UNITS * KWS_CONV3_OUT_CH * KWS_GAP_ROWS * KWS_GAP_COLS;
-    const size_t fc_out_params = (size_t)gModel.num_classes * KWS_FC1_OUT_UNITS;
+    u32 conv1_out = KWS_CONV1_OUT_CH;
+    u32 conv2_out = KWS_CONV2_OUT_CH;
+    u32 conv3_out = KWS_CONV3_OUT_CH;
+    u32 fc1_out = KWS_FC1_OUT_UNITS;
+
+    if (header.version >= KWS_WEIGHT_VERSION_V2) {
+        KwsWeightLayout layout;
+        res = read_exact(&fil, &layout, sizeof(layout));
+        if (res != FR_OK) {
+            xil_printf("KWS: unable to read weight layout (%d)\r\n", (int)res);
+            f_close(&fil);
+            return XST_FAILURE;
+        }
+        conv1_out = layout.conv1_out_channels;
+        conv2_out = layout.conv2_out_channels;
+        conv3_out = layout.conv3_out_channels;
+        fc1_out = layout.fc1_out_units;
+    }
+
+    if (conv1_out == 0U || conv2_out == 0U || conv3_out == 0U || fc1_out == 0U) {
+        xil_printf("KWS: invalid layout values (c1=%lu c2=%lu c3=%lu fc1=%lu)\r\n",
+                   (unsigned long)conv1_out,
+                   (unsigned long)conv2_out,
+                   (unsigned long)conv3_out,
+                   (unsigned long)fc1_out);
+        f_close(&fil);
+        return XST_FAILURE;
+    }
+
+    gModel.conv1_out_channels = conv1_out;
+    gModel.conv2_out_channels = conv2_out;
+    gModel.conv3_out_channels = conv3_out;
+    gModel.fc1_out_units = fc1_out;
+
+    const size_t conv1_params = (size_t)conv1_out * KWS_INPUT_DEPTH * 3U * 3U;
+    const size_t conv2_params = (size_t)conv2_out * conv1_out * 3U * 3U;
+    const size_t conv3_params = (size_t)conv3_out * conv2_out * 3U * 3U;
+    const size_t fc1_params   = (size_t)fc1_out * conv3_out * KWS_GAP_ROWS * KWS_GAP_COLS;
+    const size_t fc_out_params = (size_t)gModel.num_classes * fc1_out;
 
     gModel.conv1_weights  = (float *)malloc(conv1_params * sizeof(float));
-    gModel.conv1_bias     = (float *)calloc(KWS_CONV1_OUT_CH, sizeof(float));
-    gModel.conv1_bn_scale = (float *)malloc(KWS_CONV1_OUT_CH * sizeof(float));
-    gModel.conv1_bn_bias  = (float *)malloc(KWS_CONV1_OUT_CH * sizeof(float));
+    gModel.conv1_bias     = (float *)calloc(conv1_out, sizeof(float));
+    gModel.conv1_bn_scale = (float *)malloc(conv1_out * sizeof(float));
+    gModel.conv1_bn_bias  = (float *)malloc(conv1_out * sizeof(float));
 
     gModel.conv2_weights  = (float *)malloc(conv2_params * sizeof(float));
-    gModel.conv2_bn_scale = (float *)malloc(KWS_CONV2_OUT_CH * sizeof(float));
-    gModel.conv2_bn_bias  = (float *)malloc(KWS_CONV2_OUT_CH * sizeof(float));
+    gModel.conv2_bn_scale = (float *)malloc(conv2_out * sizeof(float));
+    gModel.conv2_bn_bias  = (float *)malloc(conv2_out * sizeof(float));
 
     gModel.conv3_weights  = (float *)malloc(conv3_params * sizeof(float));
-    gModel.conv3_bn_scale = (float *)malloc(KWS_CONV3_OUT_CH * sizeof(float));
-    gModel.conv3_bn_bias  = (float *)malloc(KWS_CONV3_OUT_CH * sizeof(float));
+    gModel.conv3_bn_scale = (float *)malloc(conv3_out * sizeof(float));
+    gModel.conv3_bn_bias  = (float *)malloc(conv3_out * sizeof(float));
 
     gModel.fc1_weights    = (float *)malloc(fc1_params * sizeof(float));
-    gModel.fc1_bn_scale   = (float *)malloc(KWS_FC1_OUT_UNITS * sizeof(float));
-    gModel.fc1_bn_bias    = (float *)malloc(KWS_FC1_OUT_UNITS * sizeof(float));
+    gModel.fc1_bn_scale   = (float *)malloc(fc1_out * sizeof(float));
+    gModel.fc1_bn_bias    = (float *)malloc(fc1_out * sizeof(float));
 
     gModel.fc_out_weights = (float *)malloc(fc_out_params * sizeof(float));
     gModel.fc_out_bias    = (float *)malloc(gModel.num_classes * sizeof(float));
@@ -404,43 +454,43 @@ static XStatus load_weights(const char *path)
 
     res = read_exact(&fil, gModel.conv1_weights, conv1_params * sizeof(float));
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv1_bias, KWS_CONV1_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv1_bias, conv1_out * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv1_bn_scale, KWS_CONV1_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv1_bn_scale, conv1_out * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv1_bn_bias, KWS_CONV1_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv1_bn_bias, conv1_out * sizeof(float));
     }
 
     if (res == FR_OK) {
         res = read_exact(&fil, gModel.conv2_weights, conv2_params * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv2_bn_scale, KWS_CONV2_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv2_bn_scale, conv2_out * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv2_bn_bias, KWS_CONV2_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv2_bn_bias, conv2_out * sizeof(float));
     }
 
     if (res == FR_OK) {
         res = read_exact(&fil, gModel.conv3_weights, conv3_params * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv3_bn_scale, KWS_CONV3_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv3_bn_scale, conv3_out * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.conv3_bn_bias, KWS_CONV3_OUT_CH * sizeof(float));
+        res = read_exact(&fil, gModel.conv3_bn_bias, conv3_out * sizeof(float));
     }
 
     if (res == FR_OK) {
         res = read_exact(&fil, gModel.fc1_weights, fc1_params * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.fc1_bn_scale, KWS_FC1_OUT_UNITS * sizeof(float));
+        res = read_exact(&fil, gModel.fc1_bn_scale, fc1_out * sizeof(float));
     }
     if (res == FR_OK) {
-        res = read_exact(&fil, gModel.fc1_bn_bias, KWS_FC1_OUT_UNITS * sizeof(float));
+        res = read_exact(&fil, gModel.fc1_bn_bias, fc1_out * sizeof(float));
     }
 
     if (res == FR_OK) {
@@ -466,14 +516,14 @@ static XStatus allocate_scratch(void)
     const size_t mono_size = KWS_TARGET_SAMPLE_RATE;
     const size_t fft_power_size = KWS_FFT_BINS;
 
-    const size_t conv1_size = (size_t)KWS_CONV1_OUT_CH * KWS_INPUT_ROWS * KWS_INPUT_COLS;
-    const size_t pool1_size = (size_t)KWS_CONV1_OUT_CH * KWS_POOL1_ROWS * KWS_POOL1_COLS;
-    const size_t conv2_size = (size_t)KWS_CONV2_OUT_CH * KWS_POOL1_ROWS * KWS_POOL1_COLS;
-    const size_t pool2_size = (size_t)KWS_CONV2_OUT_CH * KWS_POOL2_ROWS * KWS_POOL2_COLS;
-    const size_t conv3_size = (size_t)KWS_CONV3_OUT_CH * KWS_POOL2_ROWS * KWS_POOL2_COLS;
-    const size_t pool3_size = (size_t)KWS_CONV3_OUT_CH * KWS_POOL3_ROWS * KWS_POOL3_COLS;
-    const size_t gap_size   = (size_t)KWS_CONV3_OUT_CH * KWS_GAP_ROWS * KWS_GAP_COLS;
-    const size_t flat_size  = (size_t)KWS_CONV3_OUT_CH * KWS_GAP_ROWS * KWS_GAP_COLS;
+    const size_t conv1_size = (size_t)gModel.conv1_out_channels * KWS_INPUT_ROWS * KWS_INPUT_COLS;
+    const size_t pool1_size = (size_t)gModel.conv1_out_channels * KWS_POOL1_ROWS * KWS_POOL1_COLS;
+    const size_t conv2_size = (size_t)gModel.conv2_out_channels * KWS_POOL1_ROWS * KWS_POOL1_COLS;
+    const size_t pool2_size = (size_t)gModel.conv2_out_channels * KWS_POOL2_ROWS * KWS_POOL2_COLS;
+    const size_t conv3_size = (size_t)gModel.conv3_out_channels * KWS_POOL2_ROWS * KWS_POOL2_COLS;
+    const size_t pool3_size = (size_t)gModel.conv3_out_channels * KWS_POOL3_ROWS * KWS_POOL3_COLS;
+    const size_t gap_size   = (size_t)gModel.conv3_out_channels * KWS_GAP_ROWS * KWS_GAP_COLS;
+    const size_t flat_size  = (size_t)gModel.conv3_out_channels * KWS_GAP_ROWS * KWS_GAP_COLS;
 
     gScratch.input_tensor = (float *)malloc(input_tensor_size * sizeof(float));
     gScratch.mono_buffer  = (float *)malloc(mono_size * sizeof(float));
@@ -486,7 +536,7 @@ static XStatus allocate_scratch(void)
     gScratch.pool3_out    = (float *)malloc(pool3_size * sizeof(float));
     gScratch.gap_out      = (float *)malloc(gap_size * sizeof(float));
     gScratch.flat         = (float *)malloc(flat_size * sizeof(float));
-    gScratch.fc1_out      = (float *)malloc(KWS_FC1_OUT_UNITS * sizeof(float));
+    gScratch.fc1_out      = (float *)malloc(gModel.fc1_out_units * sizeof(float));
     gScratch.logits       = (float *)malloc(gModel.num_classes * sizeof(float));
 
     if (!gScratch.input_tensor || !gScratch.mono_buffer || !gScratch.fft_power ||
@@ -561,23 +611,32 @@ static void init_feature_tables(void)
     gFeatureTables.initialized = 1;
 }
 
-static XStatus extract_logmel(const int32_t *stereo_buffer,
+static XStatus extract_logmel(const int32_t *source_buffer,
                               size_t frames_per_channel,
                               float *out_tensor)
 {
-    (void)frames_per_channel;
-
     const size_t decimation = KWS_DECIMATION_FACTOR;
     const size_t mono_samples = KWS_TARGET_SAMPLE_RATE;
+    const size_t channels = KWS_SOURCE_CHANNELS;
+
+    if (channels == 0U) {
+        return XST_FAILURE;
+    }
 
     for (size_t i = 0U; i < mono_samples; ++i) {
         size_t start = i * decimation;
         double acc = 0.0;
         for (size_t j = 0U; j < decimation; ++j) {
-            size_t idx = (start + j);
-            int32_t left = stereo_buffer[idx * 2U];
-            int32_t right = stereo_buffer[idx * 2U + 1U];
-            acc += ((double)left + (double)right) * 0.5;
+            size_t frame_idx = start + j;
+            if (frame_idx >= frames_per_channel) {
+                return XST_FAILURE;
+            }
+            size_t base = frame_idx * channels;
+            double frame_sum = 0.0;
+            for (size_t ch = 0U; ch < channels; ++ch) {
+                frame_sum += (double)source_buffer[base + ch];
+            }
+            acc += frame_sum / (double)channels;
         }
         double norm = acc / (double)decimation;
         gScratch.mono_buffer[i] = (float)(norm / 2147483648.0);
@@ -776,54 +835,54 @@ static void run_network(const float *input_tensor, float *logits)
                    gModel.conv1_bias,
                    gModel.conv1_bn_scale,
                    gModel.conv1_bn_bias,
-                   KWS_CONV1_OUT_CH,
+                   gModel.conv1_out_channels,
                    gScratch.conv1_out,
                    KWS_ACT_RELU);
 
     maxpool2d(gScratch.conv1_out,
-              KWS_CONV1_OUT_CH,
+              gModel.conv1_out_channels,
               KWS_INPUT_ROWS,
               KWS_INPUT_COLS,
               gScratch.pool1_out);
 
     conv2d_forward(gScratch.pool1_out,
-                   KWS_CONV1_OUT_CH,
+                   gModel.conv1_out_channels,
                    KWS_POOL1_ROWS,
                    KWS_POOL1_COLS,
                    gModel.conv2_weights,
                    NULL,
                    gModel.conv2_bn_scale,
                    gModel.conv2_bn_bias,
-                   KWS_CONV2_OUT_CH,
+                   gModel.conv2_out_channels,
                    gScratch.conv2_out,
                    KWS_ACT_SIGN);
 
     maxpool2d(gScratch.conv2_out,
-              KWS_CONV2_OUT_CH,
+              gModel.conv2_out_channels,
               KWS_POOL1_ROWS,
               KWS_POOL1_COLS,
               gScratch.pool2_out);
 
     conv2d_forward(gScratch.pool2_out,
-                   KWS_CONV2_OUT_CH,
+                   gModel.conv2_out_channels,
                    KWS_POOL2_ROWS,
                    KWS_POOL2_COLS,
                    gModel.conv3_weights,
                    NULL,
                    gModel.conv3_bn_scale,
                    gModel.conv3_bn_bias,
-                   KWS_CONV3_OUT_CH,
+                   gModel.conv3_out_channels,
                    gScratch.conv3_out,
                    KWS_ACT_SIGN);
 
     maxpool2d(gScratch.conv3_out,
-              KWS_CONV3_OUT_CH,
+              gModel.conv3_out_channels,
               KWS_POOL2_ROWS,
               KWS_POOL2_COLS,
               gScratch.pool3_out);
 
     adaptive_avg_pool(gScratch.pool3_out,
-                      KWS_CONV3_OUT_CH,
+                      gModel.conv3_out_channels,
                       KWS_POOL3_ROWS,
                       KWS_POOL3_COLS,
                       KWS_GAP_ROWS,
@@ -832,22 +891,22 @@ static void run_network(const float *input_tensor, float *logits)
 
     memcpy(gScratch.flat,
            gScratch.gap_out,
-           (size_t)KWS_CONV3_OUT_CH * KWS_GAP_ROWS * KWS_GAP_COLS * sizeof(float));
+           (size_t)gModel.conv3_out_channels * KWS_GAP_ROWS * KWS_GAP_COLS * sizeof(float));
 
     dense_forward(gScratch.flat,
-                  KWS_CONV3_OUT_CH * KWS_GAP_ROWS * KWS_GAP_COLS,
+                  gModel.conv3_out_channels * KWS_GAP_ROWS * KWS_GAP_COLS,
                   gModel.fc1_weights,
                   NULL,
                   gModel.fc1_bn_scale,
                   gModel.fc1_bn_bias,
-                  KWS_FC1_OUT_UNITS,
+                  gModel.fc1_out_units,
                   gScratch.fc1_out,
                   KWS_ACT_SIGN);
 
     for (u32 o = 0U; o < gModel.num_classes; ++o) {
         double acc = 0.0;
-        for (u32 i = 0U; i < KWS_FC1_OUT_UNITS; ++i) {
-            acc += (double)gScratch.fc1_out[i] * (double)gModel.fc_out_weights[o * KWS_FC1_OUT_UNITS + i];
+        for (u32 i = 0U; i < gModel.fc1_out_units; ++i) {
+            acc += (double)gScratch.fc1_out[i] * (double)gModel.fc_out_weights[o * gModel.fc1_out_units + i];
         }
         acc += gModel.fc_out_bias[o];
         logits[o] = (float)acc;
