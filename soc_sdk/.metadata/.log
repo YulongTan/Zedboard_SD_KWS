@@ -25029,3 +25029,54 @@ java.lang.NullPointerException
 
 !ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.290
 !MESSAGE XSCT command with result: [::hsi::utils::closesw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Result: [null, ]. Thread: Worker-19: Build Project
+!SESSION 2025-10-31 20:10:46.206 -----------------------------------------------
+eclipse.buildId=2021.2
+java.version=11.0.11
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=zh_CN
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY org.eclipse.core.resources 2 10035 2025-10-31 20:10:53.693
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY org.eclipse.ui 4 4 2025-10-31 20:10:58.916
+!MESSAGE Plug-in 'org.eclipse.ui.editors' contributed an invalid Menu Extension (Path: 'navigate' is invalid): org.eclipse.ui.edit.text.gotoLastEditPosition
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:05.621
+!MESSAGE XSCT Command: [plnx-install-path  ; ::scw::scw_mode gui], Thread: Thread-10
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:05.623
+!MESSAGE XSCT Command: [set sdk::sdk_chan tcfchan#0], Thread: Thread-22
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:05.639
+!MESSAGE XSCT command with result: [plnx-install-path  ; ::scw::scw_mode gui], Result: [null, ]. Thread: Thread-10
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:05.640
+!MESSAGE XSCT command with result: [set sdk::sdk_chan tcfchan#0], Result: [null, tcfchan#0]. Thread: Thread-22
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:05.651
+!MESSAGE XSCT Command: [setws D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk], Thread: Thread-22
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:05.656
+!MESSAGE XSCT command with result: [setws D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk], Result: [null, ]. Thread: Thread-22
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:06.180
+!MESSAGE XSCT Command: [::hsi::utils::init_repo], Thread: Worker-4: Initializing s/w repositories
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:06.966
+!MESSAGE XSCT command with result: [::hsi::utils::init_repo], Result: [null, ]. Thread: Worker-4: Initializing s/w repositories
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:06.967
+!MESSAGE XSCT Command: [set query_var1 $::env(RDI_DATADIR)], Thread: Worker-4: Initializing s/w repositories
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-31 20:11:06.969
+!MESSAGE XSCT command with result: [set query_var1 $::env(RDI_DATADIR)], Result: [null, D:/Vitis/Vitis/2022.1/data]. Thread: Worker-4: Initializing s/w repositories
+
+!ENTRY org.eclipse.launchbar.core 2 0 2025-10-31 20:11:53.966
+!MESSAGE Enablement expression is missing for descriptor type org.eclipse.cdt.debug.core.coreBuildDescriptorType
+
+!ENTRY org.eclipse.launchbar.core 2 0 2025-10-31 20:11:53.967
+!MESSAGE Enablement expression is missing for config provider for org.eclipse.cdt.debug.core.coreBuildDescriptorType
+
+!ENTRY org.eclipse.launchbar.core 2 0 2025-10-31 20:11:53.968
+!MESSAGE Enablement expression is missing for config provider for org.eclipse.cdt.debug.core.coreBuildDescriptorType

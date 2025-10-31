@@ -31,8 +31,8 @@ SECTIONS = [
     ("fc1_weights",      None),
     ("fc1_bn_scale",     None),
     ("fc1_bn_bias",      None),
-    ("fc_out_weights",   None),
-    ("fc_out_bias",      None),
+    # ("fc_out_weights",   None),
+    # ("fc_out_bias",      None),
 ]
 
 LAYOUT_FIELDS = ("conv1_out", "conv2_out", "conv3_out", "fc1_out")
@@ -176,10 +176,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Export BNN_KWS weights to text + bin formats")
     parser.add_argument(
         "--checkpoint",
-        default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/bnn_weights_binary_new.pt",
+        default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/bnn_weights_binary_new.pt",
     )
-    parser.add_argument("--txt-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/kws_weights.txt", help="Text output file")
-    parser.add_argument("--bin-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/kws_weights.bin", help="Binary output file")
+    parser.add_argument("--txt-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/kws_weights_20251031.txt", help="Text output file")
+    parser.add_argument("--bin-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/kws_weights_20251031.bin", help="Binary output file")
     parser.add_argument("--bin-first", action="store_true", help="Checkpoint uses binary first conv")
     parser.add_argument("--bin-last", action="store_true", help="Checkpoint uses binary classifier")
     args = parser.parse_args()
