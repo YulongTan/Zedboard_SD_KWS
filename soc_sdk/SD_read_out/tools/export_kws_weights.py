@@ -12,26 +12,21 @@ from typing import Dict, Iterable, Tuple
 import torch
 
 MAGIC = 0x4B575331  # 'KWS1'
-VERSION = 0x00010000
+VERSION_V1 = 0x00010000
+VERSION_V2 = 0x00020000
+VERSION_V3 = 0x00030000
+CURRENT_VERSION = VERSION_V3
 
-# Order used by the firmware loader.
+# Order used by the firmware loader for the 10-class v2 topology.
 SECTIONS = [
-    ("conv1_weights",   None),
-    ("conv1_bias",       None),
-    ("conv1_bn_scale",   None),
-    ("conv1_bn_bias",    None),
-    ("conv2_weights",    None),
-    ("conv2_bn_scale",   None),
-    ("conv2_bn_bias",    None),
-    ("conv3_weights",    None),
-    ("conv3_bn_scale",   None),
-    ("conv3_bn_bias",    None),
-    ("fc1_weights",      None),
-    ("fc1_bn_scale",     None),
-    ("fc1_bn_bias",      None),
-    ("fc_out_weights",   None),
-    ("fc_out_bias",      None),
+    ("conv1_weights", None),
+    ("conv2_weights", None),
+    ("conv3_weights", None),
+    ("conv4_weights", None),
+    ("fc_weights", None),
 ]
+
+LAYOUT_FIELDS = ("conv1_out", "conv2_out", "conv3_out", "conv4_out")
 
 
 def _get_tensor(state: Dict[str, torch.Tensor], candidates: Iterable[str]) -> torch.Tensor:
@@ -41,80 +36,93 @@ def _get_tensor(state: Dict[str, torch.Tensor], candidates: Iterable[str]) -> to
     raise KeyError(f"None of the keys {list(candidates)} found in checkpoint")
 
 
-def _bn_to_affine(state: Dict[str, torch.Tensor], prefix: str) -> Tuple[torch.Tensor, torch.Tensor]:
-    gamma = _get_tensor(state, (f"{prefix}.weight",)).float()
-    beta = _get_tensor(state, (f"{prefix}.bias",)).float()
-    running_mean = _get_tensor(state, (f"{prefix}.running_mean",)).float()
-    running_var = _get_tensor(state, (f"{prefix}.running_var",)).float()
-    eps_key = f"{prefix}.eps"
-    eps = state.get(eps_key, torch.tensor(1e-5)).item()
-    scale = gamma / torch.sqrt(running_var + eps)
-    bias = beta - running_mean * scale
-    return scale, bias
-
-
 def _flatten(t: torch.Tensor) -> torch.Tensor:
     return t.contiguous().view(-1).float()
 
 
-def extract_sections(state: Dict[str, torch.Tensor], num_classes: int, bin_first: bool, bin_last: bool) -> Dict[str, torch.Tensor]:
+def extract_sections(
+    state: Dict[str, torch.Tensor],
+    num_classes: int,
+    _bin_first: bool = True,
+    _bin_last: bool = True,
+) -> Tuple[Dict[str, torch.Tensor], Dict[str, int]]:
     sections: Dict[str, torch.Tensor] = {}
 
-    # Stem convolution (may be binary or FP depending on training flags).
-    if bin_first:
-        conv1_w = _get_tensor(state, ("conv1.real_weight",))
-        bn_prefix = "conv1.bn"
-    else:
-        conv1_w = _get_tensor(state, ("conv1.0.weight", "conv1.weight"))
-        bn_prefix = "conv1.1" if "conv1.1.weight" in state else "conv1.bn"
+    conv1_w = _get_tensor(
+        state,
+        (
+            "conv1.conv.weight_bin",
+            "conv1.conv.weight",
+            "conv1.weight_bin",
+            "conv1.weight",
+        ),
+    )
     sections["conv1_weights"] = _flatten(conv1_w)
+    conv1_out = int(conv1_w.shape[0])
 
-    # First conv bias is not trained in reference model; emit zeros to match firmware buffer.
-    sections["conv1_bias"] = torch.zeros(conv1_w.shape[0], dtype=torch.float32)
-
-    scale, bias = _bn_to_affine(state, bn_prefix)
-    sections["conv1_bn_scale"] = _flatten(scale)
-    sections["conv1_bn_bias"] = _flatten(bias)
-
-    # Binary conv blocks use "binX" prefixes.
-    conv2_w = _get_tensor(state, ("bin2.real_weight", "conv2.weight"))
-    scale, bias = _bn_to_affine(state, "bin2.bn" if "bin2.bn.weight" in state else "conv2.bn")
+    conv2_w = _get_tensor(
+        state,
+        (
+            "conv2.conv.weight_bin",
+            "conv2.conv.weight",
+            "conv2.weight_bin",
+            "conv2.weight",
+        ),
+    )
     sections["conv2_weights"] = _flatten(conv2_w)
-    sections["conv2_bn_scale"] = _flatten(scale)
-    sections["conv2_bn_bias"] = _flatten(bias)
+    conv2_out = int(conv2_w.shape[0])
 
-    conv3_w = _get_tensor(state, ("bin3.real_weight", "conv3.weight"))
-    scale, bias = _bn_to_affine(state, "bin3.bn" if "bin3.bn.weight" in state else "conv3.bn")
+    conv3_w = _get_tensor(
+        state,
+        (
+            "conv3.conv.weight_bin",
+            "conv3.conv.weight",
+            "conv3.weight_bin",
+            "conv3.weight",
+        ),
+    )
     sections["conv3_weights"] = _flatten(conv3_w)
-    sections["conv3_bn_scale"] = _flatten(scale)
-    sections["conv3_bn_bias"] = _flatten(bias)
+    conv3_out = int(conv3_w.shape[0])
 
-    fc1_w = _get_tensor(state, ("fc1.real_weight", "fc1.weight"))
-    scale, bias = _bn_to_affine(state, "fc1.bn" if "fc1.bn.weight" in state else "fc1.1")
-    sections["fc1_weights"] = _flatten(fc1_w)
-    sections["fc1_bn_scale"] = _flatten(scale)
-    sections["fc1_bn_bias"] = _flatten(bias)
+    conv4_w = _get_tensor(
+        state,
+        (
+            "conv4.conv.weight_bin",
+            "conv4.conv.weight",
+            "conv4.weight_bin",
+            "conv4.weight",
+        ),
+    )
+    sections["conv4_weights"] = _flatten(conv4_w)
+    conv4_out = int(conv4_w.shape[0])
 
-    if bin_last:
-        raise NotImplementedError(
-            "The firmware expects a floating-point final layer; export without --bin-last"
-        )
-    else:
-        fc_out_w = _get_tensor(state, ("fc_out.weight",))
-        fc_out_b = _get_tensor(state, ("fc_out.bias",))
-        sections["fc_out_weights"] = _flatten(fc_out_w)
-        sections["fc_out_bias"] = _flatten(fc_out_b)
+    fc_w = _get_tensor(state, ("fc.weight_bin", "fc.weight"))
+    sections["fc_weights"] = _flatten(fc_w)
 
-    return sections
+    layout = {
+        "conv1_out": conv1_out,
+        "conv2_out": conv2_out,
+        "conv3_out": conv3_out,
+        "conv4_out": conv4_out,
+    }
+
+    return sections, layout
 
 
-def write_txt(path: str, num_classes: int, sections: Dict[str, torch.Tensor]) -> None:
+def write_txt(
+    path: str,
+    num_classes: int,
+    sections: Dict[str, torch.Tensor],
+    layout: Dict[str, int],
+) -> None:
     with open(path, "w", encoding="utf-8") as f:
         f.write("# KWS weight export\n")
         f.write(f"magic {MAGIC}\n")
-        f.write(f"version {VERSION}\n")
+        f.write(f"version {CURRENT_VERSION}\n")
         f.write(f"num_classes {num_classes}\n")
         f.write("reserved 0\n")
+        for key in LAYOUT_FIELDS:
+            f.write(f"layout {key} {layout[key]}\n")
         for name in SECTIONS:
             section = sections[name[0]]
             values = section.cpu().numpy()
@@ -123,9 +131,23 @@ def write_txt(path: str, num_classes: int, sections: Dict[str, torch.Tensor]) ->
                 f.write(f"{val:.8e}\n")
 
 
-def write_bin(path: str, num_classes: int, sections: Dict[str, torch.Tensor]) -> None:
+def write_bin(
+    path: str,
+    num_classes: int,
+    sections: Dict[str, torch.Tensor],
+    layout: Dict[str, int],
+) -> None:
     with open(path, "wb") as f:
-        f.write(struct.pack("<IIII", MAGIC, VERSION, num_classes, 0))
+        f.write(struct.pack("<IIII", MAGIC, CURRENT_VERSION, num_classes, 0))
+        f.write(
+            struct.pack(
+                "<IIII",
+                layout["conv1_out"],
+                layout["conv2_out"],
+                layout["conv3_out"],
+                layout["conv4_out"],
+            )
+        )
         for name in SECTIONS:
             values = sections[name[0]].cpu().numpy().astype("<f4", copy=False)
             f.write(values.tobytes(order="C"))
@@ -133,11 +155,14 @@ def write_bin(path: str, num_classes: int, sections: Dict[str, torch.Tensor]) ->
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export BNN_KWS weights to text + bin formats")
-    parser.add_argument("--checkpoint", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/bnn_KWS.pt")
+    parser.add_argument(
+        "--checkpoint",
+        default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/bnn_weights_binary_new.pt",
+    )
     parser.add_argument("--txt-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/kws_weights.txt", help="Text output file")
     parser.add_argument("--bin-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/kws_weights.bin", help="Binary output file")
     parser.add_argument("--bin-first", action="store_true", help="Checkpoint uses binary first conv")
-    parser.add_argument("--bin-last", action="store_true", help="Checkpoint uses binary classifier")
+    parser.add_argument("--bin-last", action="store_true", help="(unused, kept for compatibility)")
     args = parser.parse_args()
 
     ckpt = torch.load(args.checkpoint, map_location="cpu")
@@ -149,16 +174,19 @@ def main() -> None:
         num_classes = 0
 
     if not num_classes:
-        # Try inferring from fc_out weight shape.
-        fc_out = _get_tensor(state, ("fc_out.weight", "fc_out.real_weight"))
+        fc_out = _get_tensor(state, ("fc.weight_bin", "fc.weight"))
         num_classes = fc_out.shape[0]
 
-    sections = extract_sections(state, num_classes, args.bin_first, args.bin_last)
+    sections, layout = extract_sections(state, num_classes, args.bin_first, args.bin_last)
 
-    write_txt(args.txt_out, num_classes, sections)
-    write_bin(args.bin_out, num_classes, sections)
+    write_txt(args.txt_out, num_classes, sections, layout)
+    write_bin(args.bin_out, num_classes, sections, layout)
 
-    print(f"Exported weights to {args.txt_out} and {args.bin_out} (num_classes={num_classes})")
+    dims = ", ".join(f"{key}={layout[key]}" for key in LAYOUT_FIELDS)
+    print(
+        f"Exported weights to {args.txt_out} and {args.bin_out} "
+        f"(num_classes={num_classes}, {dims})"
+    )
 
 
 if __name__ == "__main__":
