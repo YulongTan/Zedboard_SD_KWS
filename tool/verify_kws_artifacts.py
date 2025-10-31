@@ -56,19 +56,27 @@ def _pool_out_dim(value: int) -> int:
     return ((value - 2) // 2 + 1) if value >= 2 else 0
 
 
-def _compute_expected_counts(constants: Mapping[str, int], num_classes: int) -> Dict[str, int]:
+def _compute_expected_counts(
+    constants: Mapping[str, int], layout: Mapping[str, int], num_classes: int
+) -> Dict[str, int]:
     try:
         input_depth = constants["KWS_INPUT_DEPTH"]
         input_rows = constants["KWS_INPUT_ROWS"]
         input_cols = constants["KWS_INPUT_COLS"]
-        conv1_out = constants["KWS_CONV1_OUT_CH"]
-        conv2_out = constants["KWS_CONV2_OUT_CH"]
-        conv3_out = constants["KWS_CONV3_OUT_CH"]
-        fc1_out = constants["KWS_FC1_OUT_UNITS"]
         gap_rows = constants["KWS_GAP_ROWS"]
         gap_cols = constants["KWS_GAP_COLS"]
     except KeyError as exc:
         raise SystemExit(f"Missing required macro in firmware headers: {exc}") from exc
+
+    conv1_out = int(layout.get("conv1_out") or constants.get("KWS_CONV1_OUT_CH", 0))
+    conv2_out = int(layout.get("conv2_out") or constants.get("KWS_CONV2_OUT_CH", 0))
+    conv3_out = int(layout.get("conv3_out") or constants.get("KWS_CONV3_OUT_CH", 0))
+    fc1_out = int(layout.get("fc1_out") or constants.get("KWS_FC1_OUT_UNITS", 0))
+
+    if not all(value > 0 for value in (conv1_out, conv2_out, conv3_out, fc1_out)):
+        raise SystemExit(
+            "Layer layout contains zero-sized dimensions; ensure export script and firmware agree"
+        )
 
     conv_kernel = 3 * 3
     pool1_rows = _pool_out_dim(input_rows)
@@ -122,11 +130,15 @@ def _load_checkpoint_sections(checkpoint: Path):
     bin_first = "conv1.real_weight" in state_keys
     bin_last = "fc_out.real_weight" in state_keys
 
-    sections = export_helpers.extract_sections(state, num_classes, bin_first, bin_last)
+    sections, layout = export_helpers.extract_sections(state, num_classes, bin_first, bin_last)
 
     flattened = {name: tensor.detach().cpu().view(-1).float() for name, tensor in sections.items()}
     section_order = [name for name, _ in export_helpers.SECTIONS]
-    return flattened, section_order, num_classes
+    return flattened, section_order, num_classes, layout
+
+
+WEIGHT_VERSION_V1 = 0x00010000
+WEIGHT_VERSION_V2 = 0x00020000
 
 
 def _read_weight_bin(
@@ -141,7 +153,27 @@ def _read_weight_bin(
             raise SystemExit("Weight file truncated while reading header")
         magic, version, num_classes, reserved = struct.unpack("<IIII", header_data)
 
-        expected_counts = _compute_expected_counts(constants, num_classes)
+        layout: Dict[str, int]
+        if version >= WEIGHT_VERSION_V2:
+            layout_raw = fp.read(16)
+            if len(layout_raw) != 16:
+                raise SystemExit("Weight file truncated while reading layout block")
+            conv1_out, conv2_out, conv3_out, fc1_out = struct.unpack("<IIII", layout_raw)
+            layout = {
+                "conv1_out": conv1_out,
+                "conv2_out": conv2_out,
+                "conv3_out": conv3_out,
+                "fc1_out": fc1_out,
+            }
+        else:
+            layout = {
+                "conv1_out": constants.get("KWS_CONV1_OUT_CH", 0),
+                "conv2_out": constants.get("KWS_CONV2_OUT_CH", 0),
+                "conv3_out": constants.get("KWS_CONV3_OUT_CH", 0),
+                "fc1_out": constants.get("KWS_FC1_OUT_UNITS", 0),
+            }
+
+        expected_counts = _compute_expected_counts(constants, layout, num_classes)
         sections: Dict[str, array] = {}
         for name in section_order:
             count = expected_counts[name]
@@ -167,6 +199,7 @@ def _read_weight_bin(
         {"magic": magic, "version": version, "num_classes": num_classes, "reserved": reserved},
         sections,
         expected_counts,
+        layout,
     )
 
 
@@ -253,11 +286,14 @@ def main() -> int:
     constants = _parse_numeric_macros([args.header, args.engine_source])
 
     checkpoint_sections = None
+    checkpoint_layout: Dict[str, int] | None = None
     section_order: List[str] | None = None
     num_classes: int | None = None
 
     if args.checkpoint:
-        checkpoint_sections, section_order, num_classes = _load_checkpoint_sections(args.checkpoint)
+        checkpoint_sections, section_order, num_classes, checkpoint_layout = _load_checkpoint_sections(
+            args.checkpoint
+        )
         print(f"Loaded checkpoint from {args.checkpoint} (num_classes={num_classes})")
 
     if args.weight_bin:
@@ -265,7 +301,7 @@ def main() -> int:
             export_helpers = _load_export_helpers()
             section_order = [name for name, _ in export_helpers.SECTIONS]
 
-        header, bin_sections, expected_counts = _read_weight_bin(
+        header, bin_sections, expected_counts, bin_layout = _read_weight_bin(
             args.weight_bin,
             section_order,
             constants,
@@ -282,6 +318,16 @@ def main() -> int:
 
         if num_classes is None:
             num_classes = header["num_classes"]
+
+        layout_desc = ", ".join(f"{k}={v}" for k, v in bin_layout.items())
+        print(f"Layer layout derived from weight bin: {layout_desc}")
+
+        if checkpoint_layout is not None:
+            for key in ("conv1_out", "conv2_out", "conv3_out", "fc1_out"):
+                if checkpoint_layout.get(key) != bin_layout.get(key):
+                    raise SystemExit(
+                        f"Checkpoint layout {checkpoint_layout} does not match weight bin layout {bin_layout}"
+                    )
 
         for name, arr in bin_sections.items():
             expected = expected_counts[name]
@@ -304,7 +350,8 @@ def main() -> int:
             )
 
     if checkpoint_sections is not None and args.weight_bin is None:
-        expected_counts = _compute_expected_counts(constants, num_classes or 0)
+        layout = checkpoint_layout or {}
+        expected_counts = _compute_expected_counts(constants, layout, num_classes or 0)
         for name, tensor in checkpoint_sections.items():
             expected = expected_counts[name]
             if tensor.numel() != expected:
