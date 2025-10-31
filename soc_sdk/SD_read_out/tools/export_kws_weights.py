@@ -157,10 +157,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Export BNN_KWS weights to text + bin formats")
     parser.add_argument(
         "--checkpoint",
-        default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/bnn_weights_binary_new.pt",
+        default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/bnn_weights_binary_new.pt",
     )
-    parser.add_argument("--txt-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/bnn_weights_binary_new.txt", help="Text output file")
-    parser.add_argument("--bin-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/bnn_weights_binary_new.bin", help="Binary output file")
+    parser.add_argument("--txt-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/kws_weights.txt", help="Text output file")
+    parser.add_argument("--bin-out", default="D:/Vitis/USERS/10_Zedboard_audio_in/Zedboard-DMA-2018.2-1/weights/kws_weights.bin", help="Binary output file")
     parser.add_argument("--bin-first", action="store_true", help="Checkpoint uses binary first conv")
     parser.add_argument("--bin-last", action="store_true", help="(unused, kept for compatibility)")
     args = parser.parse_args()

@@ -5,8 +5,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Sequence
+
+import numpy as np
 
 try:
     import torch
@@ -29,8 +32,65 @@ TARGET_SAMPLE_RATE = 16000
 NUM_MELS = 40
 WINDOW_SIZE = 400
 HOP_LENGTH = 160
+NUM_FRAMES = 98
+FFT_SIZE = WINDOW_SIZE
+FFT_BINS = FFT_SIZE // 2 + 1
 LOG_EPS = 1e-6
 INT32_SCALE = 2147483648.0
+
+_HANN = np.hanning(WINDOW_SIZE).astype(np.float32)
+_COS_TABLE = np.cos(
+    2.0
+    * math.pi
+    * np.arange(FFT_BINS, dtype=np.float32)[:, None]
+    * np.arange(WINDOW_SIZE, dtype=np.float32)[None, :]
+    / float(FFT_SIZE)
+).astype(np.float32)
+_SIN_TABLE = np.sin(
+    2.0
+    * math.pi
+    * np.arange(FFT_BINS, dtype=np.float32)[:, None]
+    * np.arange(WINDOW_SIZE, dtype=np.float32)[None, :]
+    / float(FFT_SIZE)
+).astype(np.float32)
+
+
+def _mel_filterbank(num_mels: int, fft_bins: int, sample_rate: int) -> np.ndarray:
+    mel_min = 2595.0 * math.log10(1.0 + 0.0 / 700.0)
+    mel_max = 2595.0 * math.log10(1.0 + (sample_rate / 2.0) / 700.0)
+    mel_points = np.linspace(mel_min, mel_max, num_mels + 2, dtype=np.float32)
+    hz_points = 700.0 * (10.0 ** (mel_points / 2595.0) - 1.0)
+    bin_points = np.floor((FFT_SIZE + 1) * hz_points / sample_rate).astype(np.int32)
+    bin_points = np.clip(bin_points, 0, fft_bins - 1)
+
+    filters = np.zeros((num_mels, fft_bins), dtype=np.float32)
+    for m in range(1, num_mels + 1):
+        start = bin_points[m - 1]
+        center = bin_points[m]
+        end = bin_points[m + 1]
+        if center <= start:
+            center = start + 1
+        if end <= center:
+            end = center + 1
+
+        up_range = center - start
+        if up_range <= 0:
+            continue
+        filters[m - 1, start:center] = (
+            np.arange(start, center, dtype=np.float32) - float(start)
+        ) / float(up_range)
+
+        down_range = end - center
+        if down_range <= 0:
+            continue
+        filters[m - 1, center:end] = (
+            float(end) - np.arange(center, end, dtype=np.float32)
+        ) / float(down_range)
+
+    return filters
+
+
+_MEL_FILTER = _mel_filterbank(NUM_MELS, FFT_BINS, TARGET_SAMPLE_RATE)
 
 
 class SignActivation(nn.Module):
@@ -98,15 +158,6 @@ class BNNKWS(nn.Module):
         return self.fc(x)
 
 
-mel_transform = T.MelSpectrogram(
-    sample_rate=TARGET_SAMPLE_RATE,
-    n_fft=WINDOW_SIZE,
-    win_length=WINDOW_SIZE,
-    hop_length=HOP_LENGTH,
-    n_mels=NUM_MELS,
-)
-
-
 def waveform_to_logmel(waveform: torch.Tensor, sample_rate: int) -> torch.Tensor:
     if waveform.dim() == 2:
         waveform = waveform.mean(dim=0, keepdim=True)
@@ -124,8 +175,27 @@ def waveform_to_logmel(waveform: torch.Tensor, sample_rate: int) -> torch.Tensor
         start = (cur_len - target_len) // 2
         waveform = waveform[:, start : start + target_len]
 
-    mel = mel_transform(waveform).clamp_min(LOG_EPS).log()
-    return mel
+    mono = waveform.squeeze(0).cpu().numpy().astype(np.float32)
+    features = np.zeros((NUM_MELS, NUM_FRAMES), dtype=np.float32)
+
+    for frame in range(NUM_FRAMES):
+        frame_offset = frame * HOP_LENGTH
+        window = mono[frame_offset : frame_offset + WINDOW_SIZE]
+        if window.shape[0] < WINDOW_SIZE:
+            padded = np.zeros(WINDOW_SIZE, dtype=np.float32)
+            padded[: window.shape[0]] = window
+            window = padded
+
+        windowed = window * _HANN
+        real = _COS_TABLE @ windowed
+        imag = -_SIN_TABLE @ windowed
+        power = real * real + imag * imag
+
+        mel = _MEL_FILTER @ power
+        mel[mel < LOG_EPS] = LOG_EPS
+        features[:, frame] = np.log(mel)
+
+    return torch.from_numpy(features)
 
 
 DEFAULT_LABELS: Sequence[str] = (
@@ -183,9 +253,9 @@ def _load_waveform_from_bin(path: Path) -> torch.Tensor:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the BNN KWS model on a single clip")
-    parser.add_argument("--weights", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/bnn_weights_binary_new.pt", type=Path, help="Path to the PyTorch checkpoint (.pt)")
-    group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument("--wav", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/yes.wav", type=Path, help="Path to the WAV file to classify")
+    parser.add_argument("weights", type=Path, help="Path to the PyTorch checkpoint (.pt)")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--wav", type=Path, help="Path to the WAV file to classify")
     group.add_argument("--bin", type=Path, help="Path to a little-endian int32 PCM binary clip")
     parser.add_argument("--labels", type=Path, help="Optional label list (text or JSON)")
     parser.add_argument("--topk", type=int, default=5, help="How many top classes to display")
