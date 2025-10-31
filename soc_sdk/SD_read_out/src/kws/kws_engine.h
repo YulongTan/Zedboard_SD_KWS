@@ -22,6 +22,9 @@ extern "C" {
 #define KWS_INPUT_ROWS           40U
 #define KWS_INPUT_COLS           98U
 #define KWS_INPUT_DEPTH          1U
+/* Legacy layer sizes kept for backward compatibility with v1 weight blobs.
+ * The runtime now reads the actual channel counts from the exported weights.
+ */
 #define KWS_CONV1_OUT_CH         32U
 #define KWS_CONV2_OUT_CH         64U
 #define KWS_CONV3_OUT_CH         64U
