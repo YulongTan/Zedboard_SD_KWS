@@ -37,6 +37,7 @@
 #define MEM_AUDIO_OFFSET	0x01000000U
 #endif
 
+// 加载MEM的基地址 DDR基地址加上偏移地址
 #ifndef MEM_BASE_ADDR
 #define MEM_BASE_ADDR		(XPAR_DDR_MEM_BASEADDR + MEM_AUDIO_OFFSET)
 #endif
@@ -77,8 +78,6 @@ int main(void)
 
 	xil_printf("\r\n--- Entering main() --- \r\n");
 
-
-
 	Status = KwsEngine_Initialize(KWS_DEFAULT_WEIGHT_PATH);
 
 	if(Status == XST_SUCCESS) {
@@ -89,10 +88,12 @@ int main(void)
 	}
 
 	size_t frames_read = 0U;
+	xil_printf("\r\n AUDIO_BUFFER_BYTES = %d \r\n", AUDIO_BUFFER_BYTES);
 	Status = LoadAudioFromSd(KWS_AUDIO_BIN_PATH,
 					 (void *)(UINTPTR)MEM_BASE_ADDR,
 					 AUDIO_BUFFER_BYTES,
 					 &frames_read);
+	xil_printf("\r\n frames_read = %d \r\n", frames_read);
 	if (Status != XST_SUCCESS) {
 		xil_printf("\r\nFailed to load audio samples from %s\r\n", KWS_AUDIO_BIN_PATH);
 		return Status;
@@ -111,11 +112,13 @@ int main(void)
 	// start inference
 	u32 classIndex = 0U;
 	float confidence = 0.0f;
-	//
+	// start inference
+	// 开始推理，MEM_BASE_ADDR存放的就是音频数据
 	Status = KwsEngine_ProcessRecording((const int32_t *)MEM_BASE_ADDR,
 					 frames_read,
 					 &classIndex,
 					 &confidence);
+
 	if (Status == XST_SUCCESS)
 	{
 		int scaled = (int)(confidence * 10000.0f + 0.5f);

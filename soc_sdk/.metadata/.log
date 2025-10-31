@@ -24994,3 +24994,38 @@ Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.]. Thread: Worker-9: Launch
 
 !ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 16:34:02.999
 !MESSAGE XSCT command with result: [con], Result: [null, ]. Thread: Worker-9: Launching SystemDebugger_SD_read_out_system
+
+!ENTRY org.eclipse.core.jobs 4 2 2025-10-30 16:49:04.851
+!MESSAGE An internal error occurred during: "Computing hover expression".
+!STACK 0
+java.lang.NullPointerException
+	at org.eclipse.cdt.debug.ui.editors.AbstractDebugTextHover$1.runOnAST(AbstractDebugTextHover.java:252)
+	at org.eclipse.cdt.ui.text.SharedASTJob$1.runOnAST(SharedASTJob.java:74)
+	at org.eclipse.cdt.internal.core.model.ASTCache.runOnAST(ASTCache.java:221)
+	at org.eclipse.cdt.internal.ui.editor.ASTProvider.runOnAST(ASTProvider.java:336)
+	at org.eclipse.cdt.ui.text.SharedASTJob.run(SharedASTJob.java:71)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.219
+!MESSAGE XSCT Command: [ ::hsi::utils::set_current_hw_sw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss ], Thread: Worker-19: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.263
+!MESSAGE XSCT command with result: [ ::hsi::utils::set_current_hw_sw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss ], Result: [null, ]. Thread: Worker-19: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.263
+!MESSAGE XSCT Command: [::hsi::utils::get_hw_sw_details -json D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Thread: Worker-19: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.281
+!MESSAGE XSCT command with result: [::hsi::utils::get_hw_sw_details -json D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/hw/design_1_wrapper.xsa D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Result: [null, {"procname": "ps7_cortexa9_0",
+"osname": "standalone",
+"osver": "7.7",
+}]. Thread: Worker-19: Build Project
+
+!ENTRY com.xilinx.sdk.utils 1 0 2025-10-30 17:03:22.284
+!MESSAGE Generating MD5 hash for file: D:\Vitis\USERS\10_Zedboard_audio_in\SD_read\soc_sdk\SD_read\export\SD_read\sw\SD_read\standalone_domain\system.mss ...
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.286
+!MESSAGE XSCT Command: [::hsi::utils::closesw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Thread: Worker-19: Build Project
+
+!ENTRY com.xilinx.sdk.utils 0 0 2025-10-30 17:03:22.290
+!MESSAGE XSCT command with result: [::hsi::utils::closesw D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/sw/SD_read/standalone_domain/system.mss], Result: [null, ]. Thread: Worker-19: Build Project
