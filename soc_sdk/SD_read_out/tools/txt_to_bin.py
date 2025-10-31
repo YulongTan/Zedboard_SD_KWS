@@ -10,7 +10,8 @@ import struct
 from typing import Dict, List
 
 MAGIC = 0x4B575331
-VERSION = 0x00010000
+VERSION_V1 = 0x00010000
+VERSION_V2 = 0x00020000
 
 EXPECTED_ORDER = [
     "conv1_weights",
@@ -30,10 +31,13 @@ EXPECTED_ORDER = [
     "fc_out_bias",
 ]
 
+LAYOUT_FIELDS = ("conv1_out", "conv2_out", "conv3_out", "fc1_out")
+
 
 def parse_text(path: str):
     header: Dict[str, int] = {}
     sections: Dict[str, List[float]] = {}
+    layout: Dict[str, int] = {}
     current_section = None
     remaining = 0
 
@@ -45,6 +49,10 @@ def parse_text(path: str):
             tokens = line.split()
             if tokens[0] in {"magic", "version", "num_classes", "reserved"}:
                 header[tokens[0]] = int(tokens[1], 0)
+            elif tokens[0] == "layout":
+                if len(tokens) != 3:
+                    raise ValueError("layout line must be `layout <name> <value>`")
+                layout[tokens[1]] = int(tokens[2], 0)
             elif tokens[0] == "section":
                 current_section = tokens[1]
                 remaining = int(tokens[2])
@@ -65,19 +73,37 @@ def parse_text(path: str):
             raise ValueError(f"Missing header field {key}")
     if header["magic"] != MAGIC:
         raise ValueError(f"Unexpected magic 0x{header['magic']:08x}")
-    if header["version"] != VERSION:
+    if header["version"] not in {VERSION_V1, VERSION_V2}:
         raise ValueError(f"Unsupported version 0x{header['version']:08x}")
+
+    if header["version"] >= VERSION_V2:
+        for key in LAYOUT_FIELDS:
+            if key not in layout:
+                raise ValueError(f"Missing layout field {key}")
+    else:
+        for key in LAYOUT_FIELDS:
+            layout.setdefault(key, 0)
 
     for name in EXPECTED_ORDER:
         if name not in sections:
             raise ValueError(f"Missing section {name}")
 
-    return header, sections
+    return header, sections, layout
 
 
-def write_bin(path: str, header: Dict[str, int], sections: Dict[str, List[float]]) -> None:
+def write_bin(path: str, header: Dict[str, int], sections: Dict[str, List[float]], layout: Dict[str, int]) -> None:
     with open(path, "wb") as f:
         f.write(struct.pack("<IIII", header["magic"], header["version"], header["num_classes"], header["reserved"]))
+        if header["version"] >= VERSION_V2:
+            f.write(
+                struct.pack(
+                    "<IIII",
+                    layout["conv1_out"],
+                    layout["conv2_out"],
+                    layout["conv3_out"],
+                    layout["fc1_out"],
+                )
+            )
         for name in EXPECTED_ORDER:
             data = sections[name]
             f.write(struct.pack(f"<{len(data)}f", *data))
@@ -89,9 +115,15 @@ def main() -> None:
     parser.add_argument("--bin-out", default="kws_weights.bin", help="Binary output path")
     args = parser.parse_args()
 
-    header, sections = parse_text(args.text_file)
-    write_bin(args.bin_out, header, sections)
-    print(f"Wrote {args.bin_out} with num_classes={header['num_classes']}")
+    header, sections, layout = parse_text(args.text_file)
+    write_bin(args.bin_out, header, sections, layout)
+    if header["version"] >= VERSION_V2:
+        dims = ", ".join(f"{key}={layout[key]}" for key in LAYOUT_FIELDS)
+        print(
+            f"Wrote {args.bin_out} with num_classes={header['num_classes']} ({dims})"
+        )
+    else:
+        print(f"Wrote {args.bin_out} with num_classes={header['num_classes']}")
 
 
 if __name__ == "__main__":
