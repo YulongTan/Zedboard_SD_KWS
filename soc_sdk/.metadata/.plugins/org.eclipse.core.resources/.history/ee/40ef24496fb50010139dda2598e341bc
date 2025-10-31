@@ -1,0 +1,232 @@
+/******************************************************************************
+* Copyright (c) 2013 - 2020 Xilinx, Inc.  All rights reserved.
+* SPDX-License-Identifier: MIT
+******************************************************************************/
+
+/***************************** Include Files *********************************/
+#include <stdio.h>
+#include <string.h>
+#include <stddef.h>
+#include <stdint.h>
+#include "sleep.h"
+#include "xparameters.h"	/* SDK generated parameters */
+#include "xplatform_info.h"
+#include "xil_printf.h"
+#include "xil_cache.h"
+#include "xsdps.h"			/* SD device driver */
+#include "xtime_l.h"
+#include "ff.h"
+#include <stdlib.h>   // 提供 rand(), srand(), RAND_MAX
+#include <time.h>     // 若需要 srand(time(NULL))
+
+//kws network
+#include "./kws/kws_engine.h"
+/************************** Constant Definitions *****************************/
+
+/**************************** Type Definitions *******************************/
+
+/***************** Macros (Inline Functions) Definitions *********************/
+
+/************************** Function Prototypes ******************************/
+
+/************************** Variable Definitions *****************************/
+#ifndef MEM_AUDIO_OFFSET
+/* Leave headroom at the DDR base for program sections and reuse a
+ * dedicated window for streaming audio frames.
+ */
+#define MEM_AUDIO_OFFSET	0x01000000U
+#endif
+
+// 加载MEM的基地址 DDR基地址加上偏移地址
+#ifndef MEM_BASE_ADDR
+#define MEM_BASE_ADDR		(XPAR_DDR_MEM_BASEADDR + MEM_AUDIO_OFFSET)
+#endif
+
+#define AUDIO_SAMPLING_RATE	  KWS_SOURCE_SAMPLE_RATE
+#define NR_SEC_TO_REC_PLAY	  1U
+#define AUDIO_FRAME_STRIDE	  KWS_SOURCE_CHANNELS
+#define AUDIO_SAMPLE_BYTES	  4U
+#define AUDIO_BUFFER_BYTES	  ((size_t)NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE * AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES)
+#define NR_AUDIO_SAMPLES	  (NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE)
+
+/* FatFs names the first SD card as drive "0:". Keep audio.bin in the
+ * root directory or adjust this path to match your layout. The fallback
+ * path preserves compatibility with prior builds that used /kws/.
+ */
+#ifndef KWS_AUDIO_BIN_PATH
+#define KWS_AUDIO_BIN_PATH	  "0:/no.bin"
+#endif
+
+/* Legacy deployments stored audio.bin under /kws/. */
+#ifndef KWS_AUDIO_FALLBACK_PATH
+#define KWS_AUDIO_FALLBACK_PATH   "0:/kws/no.bin"
+#endif
+
+static XStatus LoadAudioFromSd(const char *path,
+			       void *dst,
+			       size_t dst_capacity,
+			       size_t *out_frames);
+/************************** Buffer Setting *****************************/
+
+
+
+/**************************************************************************/
+
+int main(void)
+{
+	int Status;
+
+	xil_printf("\r\n--- Entering main() --- \r\n");
+
+	Status = KwsEngine_Initialize(KWS_DEFAULT_WEIGHT_PATH);
+
+	if(Status == XST_SUCCESS) {
+		xil_printf("\r\nKWS engine initialization successful;\r\n");
+	} else {
+		xil_printf("\r\nKWS engine initialization failed; inference disabled\r\n");
+		return Status;
+	}
+
+	size_t frames_read = 0U;
+	xil_printf("\r\n AUDIO_BUFFER_BYTES = %d \r\n", AUDIO_BUFFER_BYTES);
+	Status = LoadAudioFromSd(KWS_AUDIO_BIN_PATH,
+					 (void *)(UINTPTR)MEM_BASE_ADDR,
+					 AUDIO_BUFFER_BYTES,
+					 &frames_read);
+	xil_printf("\r\n frames_read = %d \r\n", frames_read);
+	if (Status != XST_SUCCESS) {
+		xil_printf("\r\nFailed to load audio samples from %s\r\n", KWS_AUDIO_BIN_PATH);
+		return Status;
+	}
+
+	if (frames_read < NR_AUDIO_SAMPLES) {
+		xil_printf("\r\nAudio frames insufficient: %lu < %lu\r\n",
+				(unsigned long)frames_read,
+				(unsigned long)NR_AUDIO_SAMPLES);
+		return XST_FAILURE;
+	}
+
+	// audio samples reside in DDR at MEM_BASE_ADDR
+	Xil_DCacheFlushRange((INTPTR)MEM_BASE_ADDR, AUDIO_BUFFER_BYTES);
+
+	// start inference
+	u32 classIndex = 0U;
+	float confidence = 0.0f;
+	// start inference
+	Status = KwsEngine_ProcessRecording((const int32_t *)MEM_BASE_ADDR,
+					 frames_read,
+					 &classIndex,
+					 &confidence);
+	if (Status == XST_SUCCESS)
+	{
+		int scaled = (int)(confidence * 10000.0f + 0.5f);
+		xil_printf("\r\nKWS inference: class %lu (confidence %d.%02d%%)",
+				(unsigned long)classIndex,
+				scaled / 100,
+				scaled % 100);
+	}
+	else
+	{
+		xil_printf("\r\nKWS inference failed");
+	}
+
+	return 0;
+
+}
+
+static XStatus LoadAudioFromSd(const char *path,
+                              void *dst,
+                              size_t dst_capacity,
+                              size_t *out_frames)
+{
+        if (KwsEngine_MountSd() != XST_SUCCESS) {
+                xil_printf("\r\nFailed to mount SD card before reading %s\r\n", path);
+                return XST_FAILURE;
+        }
+
+        FIL fil;
+        FRESULT res = f_open(&fil, path, FA_READ);
+        if (res != FR_OK) {
+                if (res == FR_NO_FILE && strcmp(path, KWS_AUDIO_BIN_PATH) == 0 &&
+                    strcmp(KWS_AUDIO_FALLBACK_PATH, KWS_AUDIO_BIN_PATH) != 0) {
+                        xil_printf("\r\n%s missing; retrying %s\r\n",
+                                   path,
+                                   KWS_AUDIO_FALLBACK_PATH);
+                        return LoadAudioFromSd(KWS_AUDIO_FALLBACK_PATH,
+                                               dst,
+                                               dst_capacity,
+                                               out_frames);
+                }
+
+                xil_printf("\r\nf_open(%s) failed with error %d\r\n", path, (int)res);
+                return XST_FAILURE;
+        }
+
+	const size_t bytes_per_frame = AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES;
+	FSIZE_t file_size = f_size(&fil);
+	if (file_size == 0U) {
+		xil_printf("\r\nAudio file %s is empty\r\n", path);
+		f_close(&fil);
+		return XST_FAILURE;
+	}
+
+	if (file_size > (FSIZE_t)SIZE_MAX) {
+		xil_printf("\r\nAudio file %s is too large\r\n", path);
+		f_close(&fil);
+		return XST_FAILURE;
+	}
+
+	size_t bytes_to_read = (size_t)file_size;
+	if (bytes_to_read % bytes_per_frame != 0U) {
+		xil_printf("\r\nAudio file %s size (%llu bytes) is not aligned to frame size %lu\r\n",
+			path,
+			(unsigned long long)file_size,
+			(unsigned long)bytes_per_frame);
+		f_close(&fil);
+		return XST_FAILURE;
+	}
+
+	if (bytes_to_read > dst_capacity) {
+		xil_printf("\r\nAudio buffer too small: need %lu bytes, have %lu bytes\r\n",
+			(unsigned long)bytes_to_read,
+			(unsigned long)dst_capacity);
+		f_close(&fil);
+		return XST_FAILURE;
+	}
+
+	uint8_t *byte_dst = (uint8_t *)dst;
+	size_t total_read = 0U;
+	while (total_read < bytes_to_read) {
+		size_t remaining = bytes_to_read - total_read;
+		UINT chunk = (remaining > 8192U) ? 8192U : (UINT)remaining;
+		UINT bytes_read = 0U;
+		res = f_read(&fil, byte_dst + total_read, chunk, &bytes_read);
+		if (res != FR_OK) {
+			xil_printf("\r\nf_read failed with error %d\r\n", (int)res);
+			f_close(&fil);
+			return XST_FAILURE;
+		}
+		if (bytes_read == 0U) {
+			break;
+		}
+		total_read += bytes_read;
+	}
+
+	f_close(&fil);
+
+	if (total_read != bytes_to_read) {
+		xil_printf("\r\nUnexpected end of file while reading %s\r\n", path);
+		return XST_FAILURE;
+	}
+
+	if (out_frames != NULL) {
+		*out_frames = total_read / bytes_per_frame;
+	}
+
+	xil_printf("\r\nLoaded %lu audio frames (%lu bytes) from %s\r\n",
+			(unsigned long)(total_read / bytes_per_frame),
+			(unsigned long)total_read,
+			path);
+
+	return XST_SUCCESS;
+}
