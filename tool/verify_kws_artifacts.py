@@ -3,8 +3,8 @@
 This helper validates that
 
 * the PyTorch checkpoint exports the same tensor layout that
-  ``soc_sdk/SD_read_out/src/kws/kws_engine.c`` consumes (including the
-  folded batch-normalisation scale/bias pairs),
+  ``soc_sdk/SD_read_out/src/kws/kws_engine.c`` consumes for the
+  four-layer binary convolution + linear topology,
 * the generated ``kws_weights.bin`` blob stores little-endian ``float32``
   arrays in the expected order, and
 * SD-card friendly audio binaries contain 32-bit little-endian PCM samples
@@ -52,10 +52,6 @@ def _parse_numeric_macros(paths: Iterable[Path]) -> Dict[str, int]:
     return values
 
 
-def _pool_out_dim(value: int) -> int:
-    return ((value - 2) // 2 + 1) if value >= 2 else 0
-
-
 def _compute_expected_counts(
     constants: Mapping[str, int], layout: Mapping[str, int], num_classes: int
 ) -> Dict[str, int]:
@@ -71,39 +67,21 @@ def _compute_expected_counts(
     conv1_out = int(layout.get("conv1_out") or constants.get("KWS_CONV1_OUT_CH", 0))
     conv2_out = int(layout.get("conv2_out") or constants.get("KWS_CONV2_OUT_CH", 0))
     conv3_out = int(layout.get("conv3_out") or constants.get("KWS_CONV3_OUT_CH", 0))
-    fc1_out = int(layout.get("fc1_out") or constants.get("KWS_FC1_OUT_UNITS", 0))
+    conv4_out = int(layout.get("conv4_out") or constants.get("KWS_CONV4_OUT_CH", 0))
 
-    if not all(value > 0 for value in (conv1_out, conv2_out, conv3_out, fc1_out)):
+    if not all(value > 0 for value in (conv1_out, conv2_out, conv3_out, conv4_out)):
         raise SystemExit(
             "Layer layout contains zero-sized dimensions; ensure export script and firmware agree"
         )
 
     conv_kernel = 3 * 3
-    pool1_rows = _pool_out_dim(input_rows)
-    pool1_cols = _pool_out_dim(input_cols)
-    pool2_rows = _pool_out_dim(pool1_rows)
-    pool2_cols = _pool_out_dim(pool1_cols)
-    pool3_rows = _pool_out_dim(pool2_rows)
-    pool3_cols = _pool_out_dim(pool2_cols)
-
-    flattened = conv3_out * gap_rows * gap_cols
 
     return {
         "conv1_weights": conv1_out * input_depth * conv_kernel,
-        "conv1_bias": conv1_out,
-        "conv1_bn_scale": conv1_out,
-        "conv1_bn_bias": conv1_out,
         "conv2_weights": conv2_out * conv1_out * conv_kernel,
-        "conv2_bn_scale": conv2_out,
-        "conv2_bn_bias": conv2_out,
         "conv3_weights": conv3_out * conv2_out * conv_kernel,
-        "conv3_bn_scale": conv3_out,
-        "conv3_bn_bias": conv3_out,
-        "fc1_weights": fc1_out * flattened,
-        "fc1_bn_scale": fc1_out,
-        "fc1_bn_bias": fc1_out,
-        "fc_out_weights": num_classes * fc1_out,
-        "fc_out_bias": num_classes,
+        "conv4_weights": conv4_out * conv3_out * conv_kernel,
+        "fc_weights": num_classes * conv4_out,
     }
 
 
@@ -139,6 +117,7 @@ def _load_checkpoint_sections(checkpoint: Path):
 
 WEIGHT_VERSION_V1 = 0x00010000
 WEIGHT_VERSION_V2 = 0x00020000
+WEIGHT_VERSION_V3 = 0x00030000
 
 
 def _read_weight_bin(
@@ -154,24 +133,21 @@ def _read_weight_bin(
         magic, version, num_classes, reserved = struct.unpack("<IIII", header_data)
 
         layout: Dict[str, int]
-        if version >= WEIGHT_VERSION_V2:
-            layout_raw = fp.read(16)
-            if len(layout_raw) != 16:
-                raise SystemExit("Weight file truncated while reading layout block")
-            conv1_out, conv2_out, conv3_out, fc1_out = struct.unpack("<IIII", layout_raw)
-            layout = {
-                "conv1_out": conv1_out,
-                "conv2_out": conv2_out,
-                "conv3_out": conv3_out,
-                "fc1_out": fc1_out,
-            }
-        else:
-            layout = {
-                "conv1_out": constants.get("KWS_CONV1_OUT_CH", 0),
-                "conv2_out": constants.get("KWS_CONV2_OUT_CH", 0),
-                "conv3_out": constants.get("KWS_CONV3_OUT_CH", 0),
-                "fc1_out": constants.get("KWS_FC1_OUT_UNITS", 0),
-            }
+        if version != WEIGHT_VERSION_V3:
+            raise SystemExit(
+                f"Unsupported weight blob version 0x{version:08x}; expected 0x{WEIGHT_VERSION_V3:08x}"
+            )
+
+        layout_raw = fp.read(16)
+        if len(layout_raw) != 16:
+            raise SystemExit("Weight file truncated while reading layout block")
+        conv1_out, conv2_out, conv3_out, conv4_out = struct.unpack("<IIII", layout_raw)
+        layout = {
+            "conv1_out": conv1_out,
+            "conv2_out": conv2_out,
+            "conv3_out": conv3_out,
+            "conv4_out": conv4_out,
+        }
 
         expected_counts = _compute_expected_counts(constants, layout, num_classes)
         sections: Dict[str, array] = {}
@@ -323,7 +299,7 @@ def main() -> int:
         print(f"Layer layout derived from weight bin: {layout_desc}")
 
         if checkpoint_layout is not None:
-            for key in ("conv1_out", "conv2_out", "conv3_out", "fc1_out"):
+            for key in ("conv1_out", "conv2_out", "conv3_out", "conv4_out"):
                 if checkpoint_layout.get(key) != bin_layout.get(key):
                     raise SystemExit(
                         f"Checkpoint layout {checkpoint_layout} does not match weight bin layout {bin_layout}"

@@ -27,8 +27,12 @@ extern "C" {
  */
 #define KWS_CONV1_OUT_CH         32U
 #define KWS_CONV2_OUT_CH         64U
-#define KWS_CONV3_OUT_CH         128U
-#define KWS_FC1_OUT_UNITS        256U
+#define KWS_CONV3_OUT_CH         64U
+#define KWS_CONV4_OUT_CH         64U
+#define KWS_FC_IN_UNITS          64U
+
+#define KWS_GAP_ROWS             1U
+#define KWS_GAP_COLS             1U
 
 XStatus KwsEngine_Initialize(const char *weight_file_path);
 void    KwsEngine_Shutdown(void);

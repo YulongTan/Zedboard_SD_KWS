@@ -15,11 +15,11 @@ python3 export_kws_weights.py \
 脚本会：
 
 1. 读取 PyTorch `state_dict`（支持 `checkpoint["model"]` 格式）；
-2. 按 `kws_engine.c` 期望的顺序提取各卷积/全连接权重及折叠后的 BatchNorm 斜率与偏置；
+2. 按新版 `kws_engine.c` 的顺序提取四个二值卷积层和最终二值全连接层的权重；
 3. 将所有浮点值写入 `kws_weights.txt`，便于人工检查或在导出到 `.bin` 前做微调；
-4. 同步生成小端序的 `kws_weights.bin`，文件头包含魔数 `0x4B575331`、版本 `0x00020000`，随后紧跟一组卷积/全连接通道数，最后写入类别数及各层权重参数。
+4. 同步生成小端序的 `kws_weights.bin`，文件头包含魔数 `0x4B575331`、版本 `0x00030000`，随后写入每层输出通道数与类别数，最后依序保存卷积与全连接参数。
 
-> **提示**：如果训练时启用了 `--bin-first`，记得在导出时带上同名开关，以便脚本读取正确的权重张量。固件侧的全连接输出保持浮点实现，因此暂不支持 `--bin-last` 导出的完全二值分类头。
+> **提示**：`--bin-first`/`--bin-last` 选项仅为兼容旧脚本而保留，对当前 10 类模型不再生效。
 
 ## 2. 从 `.txt` 再生成 `.bin`
 
@@ -37,4 +37,4 @@ python3 txt_to_bin.py kws_weights.txt --bin-out kws_weights.bin
 - 头部字段依次为 `magic`、`version`、`num_classes`、`reserved`；
 - 每个段落以 `section 名称 元素个数` 开始，随后的 `元素个数` 行给出对应的 `float32` 数值。
 
-该格式直接对应 `kws_engine.c` 中的读取逻辑【F:sdk_appsrc/Zedboard_DMA/src/kws/kws_engine.c†L333-L413】；默认卷积核、BatchNorm 和全连接层的排布与固件保持一致，确保生成的 `kws_weights.bin` 可以被 PS 端应用直接加载。
+该格式直接对应 `kws_engine.c` 中的读取逻辑，卷积核与全连接层的排布与固件保持一致，确保生成的 `kws_weights.bin` 可以被 PS 端应用直接加载。

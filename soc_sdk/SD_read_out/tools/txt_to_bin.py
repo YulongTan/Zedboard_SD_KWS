@@ -12,26 +12,17 @@ from typing import Dict, List
 MAGIC = 0x4B575331
 VERSION_V1 = 0x00010000
 VERSION_V2 = 0x00020000
+VERSION_V3 = 0x00030000
 
 EXPECTED_ORDER = [
     "conv1_weights",
-    "conv1_bias",
-    "conv1_bn_scale",
-    "conv1_bn_bias",
     "conv2_weights",
-    "conv2_bn_scale",
-    "conv2_bn_bias",
     "conv3_weights",
-    "conv3_bn_scale",
-    "conv3_bn_bias",
-    "fc1_weights",
-    "fc1_bn_scale",
-    "fc1_bn_bias",
-    "fc_out_weights",
-    "fc_out_bias",
+    "conv4_weights",
+    "fc_weights",
 ]
 
-LAYOUT_FIELDS = ("conv1_out", "conv2_out", "conv3_out", "fc1_out")
+LAYOUT_FIELDS = ("conv1_out", "conv2_out", "conv3_out", "conv4_out")
 
 
 def parse_text(path: str):
@@ -73,10 +64,18 @@ def parse_text(path: str):
             raise ValueError(f"Missing header field {key}")
     if header["magic"] != MAGIC:
         raise ValueError(f"Unexpected magic 0x{header['magic']:08x}")
-    if header["version"] not in {VERSION_V1, VERSION_V2}:
+    if header["version"] == VERSION_V1:
+        raise ValueError(
+            "Weight text uses legacy v1 layout; regenerate weights for the 10-class topology"
+        )
+    if header["version"] == VERSION_V2:
+        raise ValueError(
+            "Weight text uses intermediate v2 layout; regenerate weights for the 10-class topology"
+        )
+    if header["version"] != VERSION_V3:
         raise ValueError(f"Unsupported version 0x{header['version']:08x}")
 
-    if header["version"] >= VERSION_V2:
+    if header["version"] >= VERSION_V3:
         for key in LAYOUT_FIELDS:
             if key not in layout:
                 raise ValueError(f"Missing layout field {key}")
@@ -94,16 +93,16 @@ def parse_text(path: str):
 def write_bin(path: str, header: Dict[str, int], sections: Dict[str, List[float]], layout: Dict[str, int]) -> None:
     with open(path, "wb") as f:
         f.write(struct.pack("<IIII", header["magic"], header["version"], header["num_classes"], header["reserved"]))
-        if header["version"] >= VERSION_V2:
+        if header["version"] >= VERSION_V3:
             f.write(
                 struct.pack(
                     "<IIII",
                     layout["conv1_out"],
                     layout["conv2_out"],
-                    layout["conv3_out"],
-                    layout["fc1_out"],
-                )
+                layout["conv3_out"],
+                layout["conv4_out"],
             )
+        )
         for name in EXPECTED_ORDER:
             data = sections[name]
             f.write(struct.pack(f"<{len(data)}f", *data))

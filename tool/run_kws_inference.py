@@ -33,133 +33,69 @@ LOG_EPS = 1e-6
 INT32_SCALE = 2147483648.0
 
 
-class SignSTE(torch.autograd.Function):
-    """Straight-through estimator for the sign activation used in the BNN."""
-
-    @staticmethod
-    def forward(ctx, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
-        return x.sign().clamp(min=-1.0, max=1.0)
-
-    @staticmethod
-    def backward(ctx, grad_output: torch.Tensor) -> torch.Tensor:  # noqa: D401
-        return grad_output
-
-
-def binarize(x: torch.Tensor) -> torch.Tensor:
-    return SignSTE.apply(x)
-
-
-class BinaryActivation(nn.Module):
+class SignActivation(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
-        return binarize(x)
+        out = x.sign()
+        out[out == 0] = -1
+        return out
 
 
-class BinaryConv2d(nn.Module):
-    """Conv2d layer whose weights are binarised at inference time."""
+class _BinaryWeight(nn.Module):
+    def __init__(self, shape: torch.Size) -> None:
+        super().__init__()
+        self.register_buffer("weight_bin", torch.ones(shape))
 
+
+class QConv2d(nn.Module):
     def __init__(
         self,
         in_channels: int,
         out_channels: int,
-        kernel_size: int = 3,
-        stride: int = 1,
-        padding: int = 1,
-        bias: bool = False,
-        use_scale: bool = True,
+        kernel_size: int,
+        stride: int,
+        padding: int,
     ) -> None:
         super().__init__()
-        self.real_weight = nn.Parameter(
-            torch.empty(out_channels, in_channels, kernel_size, kernel_size)
-        )
-        nn.init.kaiming_normal_(self.real_weight, nonlinearity="relu")
-        self.bias = nn.Parameter(torch.zeros(out_channels)) if bias else None
-        self.bn = nn.BatchNorm2d(out_channels)
-        self.use_scale = use_scale
-        self.act = BinaryActivation()
+        self.activation = SignActivation()
+        self.conv = _BinaryWeight(torch.Size([out_channels, in_channels, kernel_size, kernel_size]))
         self.stride = stride
         self.padding = padding
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
-        weight, alpha = weight_binarize(self.real_weight, self.use_scale)
-        if alpha is not None:
-            weight = weight * alpha
-        x = F.conv2d(x, weight, self.bias, stride=self.stride, padding=self.padding)
-        x = self.bn(x)
-        x = self.act(x)
-        return x
+        x = self.activation(x)
+        weight = self.conv.weight_bin
+        return F.conv2d(x, weight, None, stride=self.stride, padding=self.padding)
 
 
 class BinaryLinear(nn.Module):
-    def __init__(self, in_features: int, out_features: int, bias: bool = False, use_scale: bool = True) -> None:
+    def __init__(self, in_features: int, out_features: int) -> None:
         super().__init__()
-        self.real_weight = nn.Parameter(torch.empty(out_features, in_features))
-        nn.init.kaiming_normal_(self.real_weight, nonlinearity="relu")
-        self.bias = nn.Parameter(torch.zeros(out_features)) if bias else None
-        self.bn = nn.BatchNorm1d(out_features)
-        self.use_scale = use_scale
-        self.act = BinaryActivation()
+        self.register_buffer("weight_bin", torch.ones(out_features, in_features))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
-        weight, alpha = weight_binarize(self.real_weight, self.use_scale)
-        if alpha is not None:
-            weight = weight * alpha
-        x = F.linear(x, weight, self.bias)
-        x = self.bn(x)
-        x = self.act(x)
-        return x
+        return F.linear(x, self.weight_bin, None)
 
 
-def weight_binarize(weight: torch.Tensor, use_scale: bool = True) -> tuple[torch.Tensor, torch.Tensor | None]:
-    if not use_scale:
-        return binarize(weight), None
-    alpha = weight.abs().mean(dim=tuple(range(1, weight.dim())), keepdim=True)
-    return binarize(weight), alpha
-
-
-class BNN_KWS(nn.Module):
-    def __init__(self, num_classes: int, bin_first: bool = False, bin_last: bool = False, use_scale: bool = True) -> None:
+class BNNKWS(nn.Module):
+    def __init__(self, num_classes: int) -> None:
         super().__init__()
-        self.bin_first = bin_first
-        self.bin_last = bin_last
-        self.use_scale = use_scale
-
-        if bin_first:
-            self.conv1 = BinaryConv2d(1, 32, use_scale=use_scale)
-        else:
-            self.conv1 = nn.Sequential(
-                nn.Conv2d(1, 32, 3, 1, 1, bias=False),
-                nn.BatchNorm2d(32),
-                nn.ReLU(inplace=True),
-            )
-        self.pool1 = nn.MaxPool2d(2)
-
-        self.bin2 = BinaryConv2d(32, 64, use_scale=use_scale)
-        self.pool2 = nn.MaxPool2d(2)
-
-        self.bin3 = BinaryConv2d(64, 128, use_scale=use_scale)
-        self.pool3 = nn.MaxPool2d(2)
-
-        self.gap = nn.AdaptiveAvgPool2d((5, 5))
-        feat_dim = 128 * 5 * 5
-
-        self.fc1 = BinaryLinear(feat_dim, 256, use_scale=use_scale)
-        if bin_last:
-            self.fc_out = BinaryLinear(256, num_classes, use_scale=use_scale)
-        else:
-            self.fc_out = nn.Linear(256, num_classes)
+        self.conv1 = QConv2d(1, 32, kernel_size=3, stride=2, padding=1)
+        self.conv2 = QConv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.conv3 = QConv2d(64, 64, kernel_size=3, stride=1, padding=0)
+        self.conv4 = QConv2d(64, 64, kernel_size=3, stride=2, padding=1)
+        self.act_out = SignActivation()
+        self.gap = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = BinaryLinear(64, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
-        x = self.conv1(x)
-        x = self.pool1(x)
-        x = self.bin2(x)
-        x = self.pool2(x)
-        x = self.bin3(x)
-        x = self.pool3(x)
+        x = self.conv1(x) + 1.0
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.act_out(x)
         x = self.gap(x)
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = self.fc_out(x)
-        return x
+        return self.fc(x)
 
 
 mel_transform = T.MelSpectrogram(
@@ -193,41 +129,16 @@ def waveform_to_logmel(waveform: torch.Tensor, sample_rate: int) -> torch.Tensor
 
 
 DEFAULT_LABELS: Sequence[str] = (
-    "backward",
-    "bed",
-    "bird",
-    "cat",
-    "dog",
-    "down",
-    "eight",
-    "five",
-    "follow",
-    "forward",
-    "four",
-    "go",
-    "happy",
-    "house",
-    "learn",
-    "left",
-    "marvin",
-    "nine",
-    "no",
-    "off",
-    "on",
-    "one",
-    "right",
-    "seven",
-    "sheila",
-    "six",
-    "stop",
-    "three",
-    "tree",
-    "two",
-    "up",
-    "visual",
-    "wow",
     "yes",
-    "zero",
+    "no",
+    "go",
+    "on",
+    "wow",
+    "happy",
+    "follow",
+    "off",
+    "stop",
+    "visual",
 )
 
 
@@ -283,15 +194,36 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def build_model(ckpt: dict) -> BNN_KWS:
-    args = ckpt.get("args", {})
-    model = BNN_KWS(
-        num_classes=int(ckpt["num_classes"]),
-        bin_first=bool(args.get("bin_first", False)),
-        bin_last=bool(args.get("bin_last", False)),
-        use_scale=not bool(args.get("no_scale", False)),
-    )
-    model.load_state_dict(ckpt["model"])
+def build_model(state_dict: dict) -> BNNKWS:
+    if isinstance(state_dict, dict) and "model" in state_dict:
+        raw_state = state_dict["model"]
+        num_classes = int(
+            state_dict.get("num_classes")
+            or state_dict.get("args", {}).get("num_classes", 0)
+            or 0
+        )
+    else:
+        raw_state = state_dict
+        num_classes = 0
+
+    if not isinstance(raw_state, dict):
+        raise SystemExit("Checkpoint must be a mapping of parameter names to tensors")
+
+    if not num_classes:
+        fc_key = next(
+            (key for key in raw_state if key.endswith("fc.weight_bin") or key.endswith("fc.weight")),
+            None,
+        )
+        if fc_key is None:
+            raise SystemExit("Unable to infer number of classes from checkpoint")
+        num_classes = int(raw_state[fc_key].shape[0])
+
+    model = BNNKWS(num_classes=num_classes)
+    missing, unexpected = model.load_state_dict(raw_state, strict=False)
+    if unexpected:
+        raise SystemExit(f"Unexpected keys in checkpoint: {unexpected}")
+    if missing:
+        raise SystemExit(f"Missing parameters when loading checkpoint: {missing}")
     model.eval()
     return model
 
