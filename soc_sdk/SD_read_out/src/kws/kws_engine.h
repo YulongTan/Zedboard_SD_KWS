@@ -10,11 +10,11 @@
 extern "C" {
 #endif
 
-/* FatFs 将第一张 SD 卡挂载为盘符 "0:"，即使权重放在根目录也需保留
- * 该前缀，例如 "0:/kws_weights.bin"。如需更改目录可修改此宏。
+/* FatFs 灏嗙涓�寮� SD 鍗℃寕杞戒负鐩樼 "0:"锛屽嵆浣挎潈閲嶆斁鍦ㄦ牴鐩綍涔熼渶淇濈暀
+ * 璇ュ墠缂�锛屼緥濡� "0:/kws_weights.bin"銆傚闇�鏇存敼鐩綍鍙慨鏀规瀹忋��
  */
 #define KWS_SD_MOUNT_POINT      "0:/"
-#define KWS_DEFAULT_WEIGHT_PATH "0:/kws_weights.bin"
+#define KWS_DEFAULT_WEIGHT_PATH "0:/bnn_weights_binary_new.bin"
 
 #define KWS_SOURCE_SAMPLE_RATE   16000U
 #define KWS_SOURCE_CHANNELS      1U

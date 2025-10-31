@@ -1,6 +1,6 @@
 Nothing to build in platform 'SD_read'
 
-17:03:22 **** Incremental Build of configuration Debug for project SD_read_out ****
+20:59:49 **** Incremental Build of configuration Debug for project SD_read_out ****
 make all 
 D:/Vitis/Vitis/2022.1/gnuwin/bin/make --no-print-directory pre-build
 a9-linaro-pre-build-step
@@ -19,13 +19,13 @@ arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=non
 'Invoking: ARM v7 Print Size'
 arm-none-eabi-size SD_read_out.elf  |tee "SD_read_out.elf.size"
    text	   data	    bss	    dec	    hex	filename
- 139732	   2228	17472256	17614216	10cc588	SD_read_out.elf
+ 136756	   2228	17472224	17611208	10cb9c8	SD_read_out.elf
 'Finished building: SD_read_out.elf.size'
 ' '
-17:03:23 **** Incremental Build of configuration Debug for project SD_read_out_system ****
+20:59:51 **** Incremental Build of configuration Debug for project SD_read_out_system ****
 make all 
 Generating bif file for the system project
-generate_system_bif.bat 9006 D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/SD_read.xpfm standalone_domain D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out_system/Debug/system.bif
+generate_system_bif.bat 3506 D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/SD_read.xpfm standalone_domain D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out_system/Debug/system.bif
 sdcard_gen --xpfm D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read/export/SD_read/SD_read.xpfm --sys_config SD_read --bif D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out_system/Debug/system.bif --bitstream D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit --elf D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/Debug/SD_read_out.elf,ps7_cortexa9_0
 creating BOOT.BIN using D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out/_ide/bitstream/design_1_wrapper.bit
 Running D:/Vitis/Vitis/2022.1/bin/bootgen  -image D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/soc_sdk/SD_read_out_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN

@@ -183,9 +183,9 @@ def _load_waveform_from_bin(path: Path) -> torch.Tensor:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the BNN KWS model on a single clip")
-    parser.add_argument("weights", type=Path, help="Path to the PyTorch checkpoint (.pt)")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--wav", type=Path, help="Path to the WAV file to classify")
+    parser.add_argument("--weights", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/bnn_weights_binary_new.pt", type=Path, help="Path to the PyTorch checkpoint (.pt)")
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument("--wav", default="D:/Vitis/USERS/10_Zedboard_audio_in/SD_read/tool/yes.wav", type=Path, help="Path to the WAV file to classify")
     group.add_argument("--bin", type=Path, help="Path to a little-endian int32 PCM binary clip")
     parser.add_argument("--labels", type=Path, help="Optional label list (text or JSON)")
     parser.add_argument("--topk", type=int, default=5, help="How many top classes to display")

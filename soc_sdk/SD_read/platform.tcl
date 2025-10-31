@@ -31,3 +31,7 @@ bsp reload
 bsp reload
 platform generate -domains 
 platform generate
+platform generate
+platform active {SD_read}
+bsp reload
+bsp reload
