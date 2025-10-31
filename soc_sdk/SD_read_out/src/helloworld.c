@@ -48,15 +48,15 @@
 #define AUDIO_BUFFER_BYTES	  ((size_t)NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE * AUDIO_FRAME_STRIDE * AUDIO_SAMPLE_BYTES)
 #define NR_AUDIO_SAMPLES	  (NR_SEC_TO_REC_PLAY * AUDIO_SAMPLING_RATE)
 
-/* FatFs names the first SD card as drive "0:". Keep audio.bin in the
- * root directory or adjust this path to match your layout. The fallback
- * path preserves compatibility with prior builds that used /kws/.
+/* FatFs 将第一张 SD 卡映射为逻辑盘符 "0:"。即便文件位于根目录，
+ * 也必须带上该前缀并写成 "0:/audio.bin"。若放在其他目录，请调整
+ * 此路径；备用路径用于兼容早期保存在 /kws/ 下的布局。
  */
 #ifndef KWS_AUDIO_BIN_PATH
 #define KWS_AUDIO_BIN_PATH	  "0:/audio.bin"
 #endif
 
-/* Legacy deployments stored audio.bin under /kws/. */
+/* 兼容旧版本：audio.bin 可能仍放在 /kws/ 目录。 */
 #ifndef KWS_AUDIO_FALLBACK_PATH
 #define KWS_AUDIO_FALLBACK_PATH   "0:/kws/audio.bin"
 #endif

@@ -59,6 +59,13 @@ typedef struct {
 } __attribute__((packed)) KwsWeightLayout;
 
 typedef struct {
+    u32 conv1_out_channels;
+    u32 conv2_out_channels;
+    u32 conv3_out_channels;
+    u32 fc1_out_units;
+} __attribute__((packed)) KwsWeightLayout;
+
+typedef struct {
     u32 num_classes;
     u32 conv1_out_channels;
     u32 conv2_out_channels;

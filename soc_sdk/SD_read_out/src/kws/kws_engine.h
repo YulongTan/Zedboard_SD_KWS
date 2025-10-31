@@ -10,8 +10,8 @@
 extern "C" {
 #endif
 
-/* Drive prefix "0:" refers to the first FatFs volume (SD card).
- * Store kws_weights.bin at the root level or adjust this path.
+/* FatFs 将第一张 SD 卡挂载为盘符 "0:"，即使权重放在根目录也需保留
+ * 该前缀，例如 "0:/kws_weights.bin"。如需更改目录可修改此宏。
  */
 #define KWS_SD_MOUNT_POINT      "0:/"
 #define KWS_DEFAULT_WEIGHT_PATH "0:/kws_weights.bin"
