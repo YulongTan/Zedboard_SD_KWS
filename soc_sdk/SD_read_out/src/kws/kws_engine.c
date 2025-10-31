@@ -50,6 +50,13 @@ typedef struct {
     u32 num_classes;
     u32 reserved;
 } __attribute__((packed)) KwsWeightHeader;
+// Model 用来存储权重
+typedef struct {
+    u32 conv1_out_channels;
+    u32 conv2_out_channels;
+    u32 conv3_out_channels;
+    u32 fc1_out_units;
+} __attribute__((packed)) KwsWeightLayout;
 
 typedef struct {
     u32 conv1_out_channels;
@@ -85,6 +92,7 @@ typedef struct {
     float *fc_out_bias;
 } KwsModel;
 
+// KwsScratch 用来存储中间结果
 typedef struct {
     float *input_tensor;
     float *mono_buffer;
@@ -241,7 +249,8 @@ XStatus KwsEngine_ProcessRecording(const int32_t *source_buffer,
         xil_printf("KWS: feature extraction failed\r\n");
         return XST_FAILURE;
     }
-
+    // 跑整个网络
+    // 预处理完的结果被暂存在gScratch.input_tensor中，gScratch.logits是网络识别结果
     run_network(gScratch.input_tensor, gScratch.logits);
 
     float max_logit = gScratch.logits[0];
@@ -358,6 +367,7 @@ static XStatus load_weights(const char *path)
     }
 
     KwsWeightHeader header;
+    // 读取并校验文件头
     res = read_exact(&fil, &header, sizeof(header));
     if (res != FR_OK) {
         xil_printf("KWS: unable to read weight header (%d)\r\n", (int)res);
@@ -441,7 +451,7 @@ static XStatus load_weights(const char *path)
 
     gModel.fc_out_weights = (float *)malloc(fc_out_params * sizeof(float));
     gModel.fc_out_bias    = (float *)malloc(gModel.num_classes * sizeof(float));
-
+    // 分配内存失败
     if (!gModel.conv1_weights || !gModel.conv1_bias || !gModel.conv1_bn_scale || !gModel.conv1_bn_bias ||
         !gModel.conv2_weights || !gModel.conv2_bn_scale || !gModel.conv2_bn_bias ||
         !gModel.conv3_weights || !gModel.conv3_bn_scale || !gModel.conv3_bn_bias ||
@@ -451,7 +461,7 @@ static XStatus load_weights(const char *path)
         f_close(&fil);
         return XST_FAILURE;
     }
-
+    // 按顺序读取到指定位置
     res = read_exact(&fil, gModel.conv1_weights, conv1_params * sizeof(float));
     if (res == FR_OK) {
         res = read_exact(&fil, gModel.conv1_bias, conv1_out * sizeof(float));
